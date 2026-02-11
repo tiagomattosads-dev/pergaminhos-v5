@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>O Pergaminho - Ficha de RPG</title>
+    <!-- Ícone da Aba (Favicon) Atualizado para o Pergaminho solicitado -->
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/7057/7057841.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=IM+Fell+DW+Pica:ital@0;1&family=MedievalSharp&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --p-bg: #1a0f00;
+            --p-text: #3e2723;
+            --p-accent: #8b4513;
+            --p-gold: #d4af37;
+        }
+
+        /* CURSOR PERSONALIZADO GLOBAL - PADRÃO (Ajustado para 35px com hotspot na ponta 0 0) */
+        * {
+            cursor: url('https://res.cloudinary.com/dutufef4s/image/upload/w_35,h_35,c_scale/v1770333154/81040f0935a24bc6ae56784a930540bdbKy0vHIUKJqNYP3D-2_riywsm.png') 0 0, auto;
+        }
+
+        /* CURSOR DE INTERAÇÃO - HOVER E CLICK (Ajustado para 35px com hotspot na ponta 0 0 para precisão total) */
+        a, 
+        button, 
+        [role="button"], 
+        input,
+        select, 
+        textarea,
+        label, 
+        .cursor-pointer,
+        *:active {
+            cursor: url('https://res.cloudinary.com/dutufef4s/image/upload/w_35,h_35,c_scale/v1770333136/07e60ce0ca344686dc46781e6e782e27NhbelZMZLXMAeyVb-2_zwwaue.png') 0 0, pointer !important;
+        }
+
+        body {
+            background-color: var(--p-bg);
+            color: var(--p-text);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden; 
+            height: 100%;
+            transition: background-color 0.4s ease, color 0.4s ease;
+        }
+
+        .parchment-text { font-family: 'IM Fell DW Pica', serif; }
+        .fantasy-title { font-family: 'MedievalSharp', cursive; }
+        .cinzel { font-family: 'Cinzel', serif; }
+        
+        /* Ocultar Spinners Numéricos Globalmente para evitar desalinhamento */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Scrollbar Dinâmica Refinada - Mais fina e temática */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: #5d4037 transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { 
+            background: #5d4037; 
+            border-radius: 4px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #8b4513; }
+
+        /* OCULTAR SCROLLBAR NO MOBILE (Obrigatório para estética de app medieval) */
+        @media (max-width: 1024px) {
+            .custom-scrollbar {
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+            }
+            .custom-scrollbar::-webkit-scrollbar {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+            }
+        }
+
+        /* REFINAMENTO DARK MODE (MASMORRA) */
+        .dark-mode {
+            --p-bg: #0f0f0f;
+            --p-text: #e8d5b5;
+            --p-accent: #d4af37;
+            background-color: #0f0f0f !important;
+        }
+
+        .dark-mode .custom-scrollbar {
+            scrollbar-color: #d4af37 transparent;
+        }
+        .dark-mode .custom-scrollbar::-webkit-scrollbar-thumb { 
+            background: #333; 
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+        .dark-mode .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #d4af37; }
+
+        .dark-mode .bg-parchment-card {
+            background-color: #1a1a1a !important;
+            border-color: #333 !important;
+            color: #e8d5b5 !important;
+        }
+
+        .dark-mode input, .dark-mode textarea, .dark-mode select {
+            color: #f4e4bc !important;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-color: rgba(212, 175, 55, 0.2);
+        }
+
+        .dark-mode input:focus, .dark-mode textarea:focus {
+            border-color: #d4af37 !important;
+            background-color: rgba(255, 255, 255, 0.07);
+        }
+
+        .dark-mode .text-medieval-primary { color: #d4af37 !important; }
+        .dark-mode .opacity-overlay { opacity: 0.15; filter: invert(1); }
+        
+        /* Efeito de brilho em itens ativos no dark mode */
+        .dark-mode .active-glow {
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+        }
+
+        /* Ajuste de contraste para placeholders */
+        .dark-mode ::placeholder {
+            color: rgba(232, 213, 181, 0.3) !important;
+        }
+
+        /* ESTADOS DE MORTE */
+        @keyframes pulse-gray {
+            0%, 100% { filter: grayscale(0); }
+            50% { filter: grayscale(1) brightness(0.9); }
+        }
+        .animate-pulse-gray {
+            animation: pulse-gray 6s ease-in-out infinite;
+        }
+        .is-fully-gray {
+            filter: grayscale(1) brightness(0.6) !important;
+            pointer-events: none;
+        }
+        .no-borders, .no-borders * {
+            border-color: transparent !important;
+            box-shadow: none !important;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
+    "path": "https://esm.sh/path@^0.12.7",
+    "vite": "https://esm.sh/vite@^7.3.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="h-full">
+    <div id="root" class="h-full"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>
