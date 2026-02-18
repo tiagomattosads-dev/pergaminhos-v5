@@ -1,3 +1,4 @@
+
 export const translations = {
   pt: {
     sheet: "Ficha",
@@ -51,9 +52,9 @@ export const translations = {
     total_weight: "Peso Tot.",
     actions: "Ações",
     empty_chest: "Baú de Viagem Vazio",
-    casting_ability: "Atributo de Poder",
+    casting_ability: "Atributo de Conjuração",
     spell_save_dc: "CD de Resistência",
-    spell_attack_mod: "Ataque Mágico",
+    spell_attack_mod: "MODIFICADOR DE ATAQUE MÁGICO",
     difficulty: "Dificuldade",
     bonus: "Bônus",
     new_spell_title: "Insculpir Novo Feitiço",
@@ -151,7 +152,19 @@ export const translations = {
     already_selected: "Já selecionado",
     change_fighting_style: "Alterar Escolha",
     fighting_style_modal_desc: "Você escolhe um estilo de combate que define seu treinamento marcial.",
-    select_btn: "Selecionar"
+    select_btn: "Selecionar",
+    companion_title: "Companheiro Animal",
+    companion_name: "Nome do Companheiro",
+    companion_species: "Espécie",
+    companion_ac_note: "Sua Proficiência é somada à CA e Dano.",
+    companion_bond: "Vínculo com o Companheiro (PHB)",
+    companion_skills: "Perícias Proficientes (Máx 2)",
+    companion_attacks: "Ataques do Companheiro",
+    companion_maintenance: "Manutenção e Retorno",
+    companion_reach: "Alcance",
+    companion_attack_bonus: "Bônus Atk",
+    companion_damage: "Dano",
+    add_companion_attack: "Adicionar Ataque Animal"
   },
   en: {
     sheet: "Sheet",
@@ -205,9 +218,9 @@ export const translations = {
     total_weight: "Tot. Weight",
     actions: "Actions",
     empty_chest: "Empty Traveling Chest",
-    casting_ability: "Power Attribute",
+    casting_ability: "Casting Ability",
     spell_save_dc: "Save DC",
-    spell_attack_mod: "Spell Attack",
+    spell_attack_mod: "Spell Attack Bonus",
     difficulty: "Difficulty",
     bonus: "Bonus",
     new_spell_title: "Inscribe New Spell",
@@ -305,7 +318,19 @@ export const translations = {
     already_selected: "Already selected",
     change_fighting_style: "Change Choice",
     fighting_style_modal_desc: "You choose a style of combat that defines your martial training.",
-    select_btn: "Select"
+    select_btn: "Select",
+    companion_title: "Animal Companion",
+    companion_name: "Companion Name",
+    companion_species: "Species",
+    companion_ac_note: "Your Proficiency is added to AC and Damage.",
+    companion_bond: "Companion's Bond (PHB)",
+    companion_skills: "Proficient Skills (Max 2)",
+    companion_attacks: "Companion Attacks",
+    companion_maintenance: "Maintenance and Return",
+    companion_reach: "Reach",
+    companion_attack_bonus: "Atk Bonus",
+    companion_damage: "Damage",
+    add_companion_attack: "Add Animal Attack"
   }
 };
 
@@ -388,6 +413,7 @@ export const subclassTranslations: Record<string, { pt: string, en: string }> = 
   "Caminho da Sombra": { pt: "Caminho da Sombra", en: "Way of Shadow" },
   "Caminho dos Quatro Elementos": { pt: "Caminho dos Quatro Elementos", en: "Way of the Four Elements" },
   "Juramento de Devoção": { pt: "Juramento de Devoção", en: "Oath of Devotion" },
+  "Juramento da Devoção": { pt: "Juramento da Devoção", en: "Oath of Devotion" },
   "Juramento dos Anciões": { pt: "Juramento dos Anciões", en: "Oath of the Ancients" },
   "Juramento de Vingança": { pt: "Juramento de Vingança", en: "Oath of Vengeance" },
   "Caçador": { pt: "Caçador", en: "Hunter" },

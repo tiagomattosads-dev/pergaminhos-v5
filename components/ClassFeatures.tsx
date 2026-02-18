@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Character } from '../types';
 import { translations, classTranslations, subclassTranslations } from '../translations';
 import { SUBCLASS_LEVELS } from '../constants';
-import { BARBARIAN_FEATURES, WARRIOR_FEATURES, ROGUE_FEATURES, FeatureInfo } from '../data/classFeaturesData';
+import { BARBARIAN_FEATURES, WARRIOR_FEATURES, ROGUE_FEATURES, PALADIN_FEATURES, RANGER_FEATURES, HUNTER_FEATURES, FeatureInfo } from '../data/classFeaturesData';
 
 interface Props {
   character: Character;
@@ -45,6 +46,7 @@ const ClassFeatures: React.FC<Props> = ({ character, updateCharacter, onSelectSu
 
   const [showStyleModal, setShowStyleModal] = useState(false);
   const [styleSlotTarget, setStyleSlotTarget] = useState<number>(0);
+  const [tempInput, setTempInput] = useState("");
 
   const translateValue = (val: string, dictionary: Record<string, { pt: string, en: string }>) => {
     return dictionary[val] ? dictionary[val][lang] : val;
@@ -68,12 +70,48 @@ const ClassFeatures: React.FC<Props> = ({ character, updateCharacter, onSelectSu
     if (character.class === "Bárbaro") baseFeatures = BARBARIAN_FEATURES;
     if (character.class === "Guerreiro") baseFeatures = WARRIOR_FEATURES;
     if (character.class === "Ladino") baseFeatures = ROGUE_FEATURES;
+    if (character.class === "Paladino") baseFeatures = PALADIN_FEATURES;
+    if (character.class === "Patrulheiro") baseFeatures = RANGER_FEATURES;
 
-    return baseFeatures.filter(f => {
+    const filtered = baseFeatures.filter(f => {
       if (f.level !== level) return false;
       if (!f.subclass) return true;
       return f.subclass === character.subclass;
     });
+
+    if (character.subclass === "Caçador" && HUNTER_FEATURES[level]) {
+      const choice = character.hunterChoices?.[level];
+      if (choice) {
+        const feature = HUNTER_FEATURES[level].find(h => h.name === choice);
+        if (feature) filtered.push(feature);
+      } else {
+        filtered.push({
+          name: "Escolha Necessária",
+          description: "Reivindique sua especialização para este nível selecionando uma das opções abaixo.",
+          level: level,
+          actionType: "Estrutural"
+        });
+      }
+    }
+
+    return filtered;
+  };
+
+  const handleHunterChoice = (level: number, choice: string) => {
+    const choices = { ...(character.hunterChoices || {}), [level]: choice };
+    updateCharacter({ hunterChoices: choices });
+  };
+
+  const addFavored = (type: 'enemy' | 'terrain') => {
+    if (!tempInput.trim()) return;
+    if (type === 'enemy') {
+      const list = [...(character.favoredEnemies || []), tempInput];
+      updateCharacter({ favoredEnemies: list });
+    } else {
+      const list = [...(character.favoredTerrains || []), tempInput];
+      updateCharacter({ favoredTerrains: list });
+    }
+    setTempInput("");
   };
 
   const selectFightingStyle = (styleName: string) => {
@@ -92,12 +130,9 @@ const ClassFeatures: React.FC<Props> = ({ character, updateCharacter, onSelectSu
 
   const ActionBadge = ({ type }: { type?: string }) => {
     if (!type) return null;
-    
-    // Cores baseadas em palavras-chave para suportar os novos tipos compostos
     let bgColor = isDark ? 'bg-slate-800/40' : 'bg-slate-50';
     let textColor = isDark ? 'text-slate-400' : 'text-slate-800';
     let borderColor = isDark ? 'border-slate-700/40' : 'border-slate-200';
-
     if (type.includes('Ativa')) {
       bgColor = isDark ? 'bg-red-950/40' : 'bg-red-50';
       textColor = isDark ? 'text-red-400' : 'text-red-800';
@@ -126,8 +161,11 @@ const ClassFeatures: React.FC<Props> = ({ character, updateCharacter, onSelectSu
       bgColor = isDark ? 'bg-indigo-950/40' : 'bg-indigo-50';
       textColor = isDark ? 'text-indigo-400' : 'text-indigo-800';
       borderColor = isDark ? 'border-indigo-900/40' : 'border-indigo-200';
+    } else if (type.includes('Recurso')) {
+      bgColor = isDark ? 'bg-violet-950/40' : 'bg-violet-50';
+      textColor = isDark ? 'text-violet-400' : 'text-violet-800';
+      borderColor = isDark ? 'border-violet-900/40' : 'border-violet-200';
     }
-
     return (
       <span className={`px-2 py-0.5 rounded text-[8px] cinzel font-bold uppercase tracking-widest border ${bgColor} ${textColor} ${borderColor}`}>
         {type}
@@ -247,17 +285,9 @@ const ClassFeatures: React.FC<Props> = ({ character, updateCharacter, onSelectSu
                     <span className="fantasy-title text-xl text-white/30">{level}</span>
                   </div>
                   <div className={`flex-grow border-2 border-dashed rounded-3xl p-8 relative overflow-hidden ${isDark ? 'bg-black/10 border-white/5' : 'bg-black/5 border-black/5'}`}>
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex flex-col gap-2">
-                        <h4 className="cinzel font-bold text-[10px] tracking-[0.3em] uppercase opacity-40">
-                          {lang === 'pt' ? `DESBLOQUEIA NO NÍVEL ${level}` : `UNLOCKS AT LEVEL ${level}`}
-                        </h4>
-                        <div className="h-0.5 w-16 bg-current opacity-10 rounded-full"></div>
-                      </div>
-                      <div className="w-10 h-10 flex-none opacity-20">
-                         <svg fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
-                      </div>
-                    </div>
+                    <h4 className="cinzel font-bold text-[10px] tracking-[0.3em] uppercase opacity-40">
+                      {lang === 'pt' ? `DESBLOQUEIA NO NÍVEL ${level}` : `UNLOCKS AT LEVEL ${level}`}
+                    </h4>
                   </div>
                 </div>
                );
@@ -274,115 +304,120 @@ const ClassFeatures: React.FC<Props> = ({ character, updateCharacter, onSelectSu
                 </div>
 
                 <div className="flex-grow flex flex-col gap-6">
-                  {levelFeatures.length === 0 ? (
-                    <div className={`border-2 rounded-[2rem] p-8 sm:p-10 shadow-xl opacity-40 ${isDark ? 'bg-[#1a1a1a] border-white/5' : 'bg-white border-[#8b4513]/10'}`}>
-                       <h4 className={`cinzel font-bold text-sm tracking-[0.3em] uppercase mb-3 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>
-                         {t.feature} de Nível {level}
-                       </h4>
-                       <p className="parchment-text italic text-sm leading-relaxed">
-                         {lang === 'pt' ? 'Aprimoramento das capacidades naturais e instintos básicos.' : 'Honing of natural capabilities and basic instincts.'}
-                       </p>
-                    </div>
-                  ) : (
-                    levelFeatures.map((f, idx) => {
-                      const isStyleSlot = f.name === "Estilo de Luta" || f.name === "Estilo de Combate Adicional";
-                      const slotIdx = f.name === "Estilo de Luta" ? 0 : 1;
-                      const selectedStyleName = character.fightingStyles?.[slotIdx];
-                      const styleData = selectedStyleName ? FIGHTING_STYLES_PHB.find(s => s.name === selectedStyleName) : null;
+                  {levelFeatures.map((f, idx) => {
+                    const isStyleSlot = f.name === "Estilo de Luta" || f.name === "Estilo de Combate Adicional";
+                    const slotIdx = f.name === "Estilo de Luta" ? 0 : 1;
+                    const selectedStyleName = character.fightingStyles?.[slotIdx];
+                    const styleData = selectedStyleName ? FIGHTING_STYLES_PHB.find(s => s.name === selectedStyleName) : null;
 
-                      return (
-                        <div 
-                          key={idx} 
-                          className={`border-2 rounded-[2rem] p-8 sm:p-10 shadow-2xl relative overflow-hidden transition-all group/card hover:shadow-[0_15px_40px_rgba(0,0,0,0.3)] ${
-                            f.isKey 
-                              ? (isDark ? 'bg-[#1a1a1a] border-[#d4af37]/40 ring-1 ring-[#d4af37]/20' : 'bg-white border-[#8b4513]/40 ring-1 ring-[#8b4513]/10')
-                              : (isDark ? 'bg-[#1a1a1a] border-white/5' : 'bg-white border-[#8b4513]/10')
-                          }`}
-                        >
-                          {f.isKey && (
-                            <div className={`absolute -right-12 -top-12 w-24 h-24 rotate-45 pointer-events-none opacity-20 ${isDark ? 'bg-[#d4af37]' : 'bg-[#8b4513]'}`}></div>
-                          )}
-                          
-                          <div className="flex flex-col gap-4">
-                            <div className="flex flex-wrap items-center justify-between gap-4">
-                              <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-3">
-                                  <h4 className={`fantasy-title text-3xl tracking-wide group-hover/card:text-[#d4af37] transition-colors ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}>
-                                    {isStyleSlot && styleData ? `${t.fighting_style} — ${styleData.name}` : f.name}
-                                  </h4>
-                                  {f.subclass && (
-                                    <span className={`px-2 py-0.5 rounded border text-[7px] cinzel font-bold uppercase tracking-widest ${
-                                      isDark ? 'bg-[#8b4513]/20 border-[#8b4513]/40 text-[#d4af37]' : 'bg-orange-50 border-[#8b4513]/20 text-[#8b4513]'
-                                    }`}>
-                                      {lang === 'pt' ? 'VÍNCULO DE CAMINHO' : 'PATH BOND'}
-                                    </span>
-                                  )}
-                                </div>
-                                {(f.summary || isStyleSlot) && (
-                                  <p className={`cinzel text-[10px] font-bold tracking-widest opacity-60 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>
-                                    {isStyleSlot ? (styleData ? t.saves : t.fighting_style_modal_desc) : f.summary}
-                                  </p>
-                                )}
-                              </div>
-                              <ActionBadge type={isStyleSlot && styleData ? 'Passiva' : f.actionType} />
-                            </div>
-                            
-                            <div className={`relative p-1 border-l-4 rounded-r-xl ${isDark ? 'border-[#d4af37]/20 bg-white/5' : 'border-[#8b4513]/20 bg-black/5'}`}>
-                              <p className={`parchment-text text-lg leading-relaxed p-4 italic ${isDark ? 'text-[#e8d5b5]/90' : 'text-[#3e2723]/90'}`}>
-                                "{isStyleSlot && styleData ? styleData.description : f.description}"
-                              </p>
-                            </div>
-
-                            {isStyleSlot && (
-                              <div className="mt-4 flex gap-3">
-                                {!styleData ? (
-                                  <button 
-                                    onClick={() => { setStyleSlotTarget(slotIdx); setShowStyleModal(true); }}
-                                    className={`px-8 py-3 rounded-xl cinzel text-[10px] font-bold uppercase tracking-[0.2em] transition-all border-b-4 active:translate-y-1 active:border-b-0 shadow-lg ${
-                                      isDark ? 'bg-[#d4af37] text-black border-black/40' : 'bg-[#8b4513] text-white border-black/40'
-                                    }`}
-                                  >
-                                    {t.choose_fighting_style}
-                                  </button>
-                                ) : (
-                                  <button 
-                                    onClick={() => { setStyleSlotTarget(slotIdx); setShowStyleModal(true); }}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg cinzel text-[8px] font-bold uppercase tracking-widest transition-all opacity-40 hover:opacity-100 ${
-                                      isDark ? 'text-[#d4af37] border border-[#d4af37]/20' : 'text-[#8b4513] border border-[#8b4513]/20'
-                                    }`}
-                                  >
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                                    {t.change_fighting_style}
-                                  </button>
-                                )}
-                              </div>
-                            )}
-
-                            {character.subclass === "Caminho do Guerreiro Totêmico" && f.name === "Totem Espiritual" && (
-                              <div className={`mt-8 p-6 rounded-2xl border-2 border-dashed ${isDark ? 'bg-[#d4af37]/5 border-[#d4af37]/20' : 'bg-orange-100/30 border-[#8b4513]/20'}`}>
-                                 <p className="cinzel text-[10px] font-bold uppercase tracking-[0.3em] mb-6 opacity-60 text-center">{lang === 'pt' ? 'CONVOCAR ESPÍRITO GUARDIÃO' : 'SUMMON GUARDIAN SPIRIT'}</p>
-                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    {["Águia", "Lobo", "Urso"].map(totem => (
-                                      <button
-                                        key={totem}
-                                        onClick={() => updateCharacter({ totemAnimal: totem })}
-                                        className={`p-4 rounded-xl cinzel text-xs font-bold uppercase transition-all border-2 relative group/totem ${
-                                          character.totemAnimal === totem
-                                          ? (isDark ? 'bg-[#d4af37] border-white text-black shadow-[0_0_20px_rgba(212,175,55,0.4)] scale-105' : 'bg-[#8b4513] border-[#d4af37] text-white shadow-xl scale-105')
-                                          : (isDark ? 'bg-black/60 border-white/5 text-white/40 hover:border-[#d4af37]/40' : 'bg-white border-[#8b4513]/10 text-[#8b4513]/40 hover:border-[#8b4513]')
-                                        }`}
-                                      >
-                                        {totem}
-                                      </button>
-                                    ))}
-                                 </div>
-                              </div>
-                            )}
+                    return (
+                      <div 
+                        key={idx} 
+                        className={`border-2 rounded-[2rem] p-8 sm:p-10 shadow-2xl relative overflow-hidden transition-all group/card ${
+                          isDark ? 'bg-[#1a1a1a] border-white/5' : 'bg-white border-[#8b4513]/10'
+                        }`}
+                      >
+                        <div className="flex flex-col gap-4">
+                          <div className="flex flex-wrap items-center justify-between gap-4">
+                            <h4 className={`fantasy-title text-3xl tracking-wide ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}>
+                              {isStyleSlot && styleData ? `${t.fighting_style} — ${styleData.name}` : f.name}
+                            </h4>
+                            <ActionBadge type={f.actionType} />
                           </div>
+                          
+                          <p className={`parchment-text text-lg leading-relaxed italic ${isDark ? 'text-[#e8d5b5]/90' : 'text-[#3e2723]/90'}`}>
+                            {isStyleSlot && styleData ? styleData.description : f.description}
+                          </p>
+
+                          {/* Lógica de Favorecidos do Patrulheiro */}
+                          {character.class === "Patrulheiro" && f.name === "Inimigo Favorecido" && (
+                            <div className="mt-4 p-4 rounded-xl border-2 border-dashed border-black/10 bg-black/5">
+                               <p className="cinzel text-[9px] font-bold mb-4 uppercase opacity-60">Tipos Favorecidos:</p>
+                               <div className="flex flex-wrap gap-2 mb-4">
+                                  {(character.favoredEnemies || []).map((e, i) => (
+                                    <span key={i} className="px-3 py-1 bg-black/20 rounded-lg cinzel text-[10px] text-[#d4af37] border border-[#d4af37]/20">{e}</span>
+                                  ))}
+                               </div>
+                               <div className="flex gap-2">
+                                  <input 
+                                    className="flex-grow bg-transparent border-b border-current cinzel text-xs py-1 focus:outline-none" 
+                                    placeholder="Adicionar tipo..." 
+                                    value={tempInput}
+                                    onChange={e => setTempInput(e.target.value)}
+                                  />
+                                  <button onClick={() => addFavored('enemy')} className="cinzel text-[9px] font-bold text-[#d4af37] uppercase">Confirmar</button>
+                               </div>
+                            </div>
+                          )}
+
+                          {character.class === "Patrulheiro" && f.name === "Explorador Nato" && (
+                            <div className="mt-4 p-4 rounded-xl border-2 border-dashed border-black/10 bg-black/5">
+                               <p className="cinzel text-[9px] font-bold mb-4 uppercase opacity-60">Terrenos Favorecidos:</p>
+                               <div className="flex flex-wrap gap-2 mb-4">
+                                  {(character.favoredTerrains || []).map((t, i) => (
+                                    <span key={i} className="px-3 py-1 bg-black/20 rounded-lg cinzel text-[10px] text-[#d4af37] border border-[#d4af37]/20">{t}</span>
+                                  ))}
+                               </div>
+                               <div className="flex gap-2">
+                                  <input 
+                                    className="flex-grow bg-transparent border-b border-current cinzel text-xs py-1 focus:outline-none" 
+                                    placeholder="Adicionar terreno..." 
+                                    value={tempInput}
+                                    onChange={e => setTempInput(e.target.value)}
+                                  />
+                                  <button onClick={() => addFavored('terrain')} className="cinzel text-[9px] font-bold text-[#d4af37] uppercase">Confirmar</button>
+                               </div>
+                            </div>
+                          )}
+
+                          {/* Lógica de Escolha do Caçador */}
+                          {character.subclass === "Caçador" && HUNTER_FEATURES[level] && !character.hunterChoices?.[level] && (
+                            <div className="mt-8 grid grid-cols-1 gap-4">
+                                <div className="h-px bg-current opacity-10 w-full mb-2"></div>
+                                <p className="cinzel text-[9px] font-bold uppercase tracking-widest opacity-60 text-center">Reclame sua Especialização</p>
+                                {HUNTER_FEATURES[level].map((opt, oIdx) => (
+                                    <button
+                                        key={oIdx}
+                                        onClick={() => handleHunterChoice(level, opt.name)}
+                                        className={`p-6 rounded-2xl border-2 transition-all flex flex-col text-left group/opt ${
+                                            isDark ? 'bg-black/40 border-white/5 hover:border-[#d4af37]/40' : 'bg-[#8b4513]/5 border-[#8b4513]/10 hover:border-[#8b4513]'
+                                        }`}
+                                    >
+                                        <span className={`fantasy-title text-xl mb-2 transition-colors ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{opt.name}</span>
+                                        <span className="parchment-text text-sm opacity-80 leading-snug">{opt.description}</span>
+                                    </button>
+                                ))}
+                            </div>
+                          )}
+
+                          {isStyleSlot && (
+                            <div className="mt-4 flex gap-3">
+                              {!styleData ? (
+                                <button 
+                                  onClick={() => { setStyleSlotTarget(slotIdx); setShowStyleModal(true); }}
+                                  className={`px-8 py-3 rounded-xl cinzel text-[10px] font-bold uppercase tracking-[0.2em] transition-all border-b-4 active:translate-y-1 active:border-b-0 shadow-lg ${
+                                    isDark ? 'bg-[#d4af37] text-black border-black/40' : 'bg-[#8b4513] text-white border-black/40'
+                                  }`}
+                                >
+                                  {t.choose_fighting_style}
+                                </button>
+                              ) : (
+                                <button 
+                                  onClick={() => { setStyleSlotTarget(slotIdx); setShowStyleModal(true); }}
+                                  className={`flex items-center gap-2 px-4 py-2 rounded-lg cinzel text-[8px] font-bold uppercase tracking-widest transition-all opacity-40 hover:opacity-100 ${
+                                    isDark ? 'text-[#d4af37] border border-[#d4af37]/20' : 'text-[#8b4513] border border-[#8b4513]/20'
+                                  }`}
+                                >
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                  {t.change_fighting_style}
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
-                      );
-                    })
-                  )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
@@ -413,7 +448,6 @@ const ClassFeatures: React.FC<Props> = ({ character, updateCharacter, onSelectSu
                  <div className="w-full space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                     {FIGHTING_STYLES_PHB.map(style => {
                       const isAlreadyChosen = character.fightingStyles?.some((s, idx) => s === style.name && idx !== styleSlotTarget);
-                      
                       return (
                         <div 
                           key={style.name}
@@ -443,10 +477,10 @@ const ClassFeatures: React.FC<Props> = ({ character, updateCharacter, onSelectSu
                     })}
                  </div>
 
-                 <div className="mt-8 pt-6 border-t border-black/10">
+                 <div className="mt-8 pt-6 border-t border-black/10 text-center">
                     <button 
                       onClick={() => setShowStyleModal(false)}
-                      className={`w-full py-3 rounded-xl cinzel text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity`}
+                      className={`py-3 rounded-xl cinzel text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity`}
                     >
                       {t.cancel}
                     </button>

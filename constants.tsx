@@ -53,7 +53,7 @@ export const SUBCLASSES_PHB: Record<string, string[]> = {
   "Druida": ["Círculo da Terra", "Círculo da Lua"],
   "Guerreiro": ["Campeão", "Mestre de Batalha", "Cavaleiro Arcano"],
   "Monge": ["Caminho da Mão Aberta", "Caminho da Sombra", "Caminho dos Quatro Elementos"],
-  "Paladino": ["Juramento de Devoção", "Juramento dos Anciões", "Juramento de Vingança"],
+  "Paladino": ["Juramento da Devoção", "Juramento dos Anciões", "Juramento de Vingança"],
   "Patrulheiro": ["Caçador", "Mestre das Bestas"],
   "Ladino": ["Ladrão", "Assassino", "Trapaceiro Arcano"],
   "Feiticeiro": ["Linhagem Dracônica", "Magia Selvagem"],

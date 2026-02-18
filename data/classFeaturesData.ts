@@ -9,7 +9,6 @@ export interface FeatureInfo {
 }
 
 export const BARBARIAN_FEATURES: FeatureInfo[] = [
-  // Base Class - Level 1
   { 
     name: "Fúria", 
     level: 1, 
@@ -25,8 +24,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'CA baseada em Destreza e Constituição.',
     description: "Quando não estiver usando armadura, sua Classe de Armadura é igual a 10 + modificador de Destreza + modificador de Constituição. Você ainda pode usar escudo." 
   },
-  
-  // Level 2
   { 
     name: "Ataque Descuidado", 
     level: 2, 
@@ -42,8 +39,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Vantagem em testes de resistência de Destreza.',
     description: "Você tem vantagem em testes de resistência de Destreza contra efeitos que possa ver, como armadilhas e magias, desde que não esteja cego, surdo ou incapacitado." 
   },
-  
-  // Level 3
   { 
     name: "Caminho Primitivo", 
     level: 3, 
@@ -51,8 +46,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Escolha de especialização de arquétipo.',
     description: "Você escolhe um caminho que define sua especialização como bárbaro, concedendo habilidades adicionais nos níveis 3, 6, 10 e 14." 
   },
-  
-  // Level 4
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 4, 
@@ -60,8 +53,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Aumento de atributos ou novo talento.',
     description: "Você pode aumentar um atributo em +2, ou dois atributos em +1 cada. Alternativamente, pode escolher um talento, se essa regra estiver em uso." 
   },
-  
-  // Level 5
   { 
     name: "Ataque Extra", 
     level: 5, 
@@ -77,8 +68,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: '+3 metros de deslocamento.',
     description: "Seu deslocamento aumenta em +3 metros enquanto você não estiver usando armadura pesada." 
   },
-  
-  // Level 7
   { 
     name: "Instinto Feral", 
     level: 7, 
@@ -87,8 +76,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     isKey: true,
     description: "Você tem vantagem nas jogadas de iniciativa. Além disso, se estiver surpreendido no início do combate, pode agir normalmente no primeiro turno se entrar em fúria." 
   },
-  
-  // Level 8
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 8, 
@@ -96,8 +83,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Aumento de atributos ou novo talento.',
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-  
-  // Level 9
   { 
     name: "Crítico Brutal", 
     level: 9, 
@@ -105,8 +90,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: '+1 dado de dano extra em acertos críticos.',
     description: "Ao acertar um acerto crítico com um ataque corpo a corpo, você rola um dado adicional de dano do mesmo tipo da arma. Este valor aumenta conforme o nível." 
   },
-
-  // Level 11
   { 
     name: "Fúria Implacável", 
     level: 11, 
@@ -114,8 +97,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Resistir à morte enquanto em fúria.',
     description: "Enquanto estiver em fúria, se cair a 0 pontos de vida e não morrer imediatamente, você pode fazer um teste de Constituição (CD 10) para permanecer consciente com 1 ponto de vida. A CD aumenta a cada uso após o primeiro, e é redefinida após um descanso longo." 
   },
-
-  // Level 12
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 12, 
@@ -123,17 +104,13 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Aumento de atributos ou novo talento.',
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 13
   { 
     name: "Crítico Brutal", 
     level: 13, 
     actionType: 'Upgrade',
     summary: '+2 dados de dano extra em acertos críticos.',
-    description: "O número de dados extras de dano ao realizar um acerto crítico com ataque corpo a corpo aumenta para dois." 
+    description: "O número de dados extras de dano al realizar um acerto crítico com ataque corpo a corpo aumenta para dois." 
   },
-
-  // Level 15
   { 
     name: "Fúria Persistente", 
     level: 15, 
@@ -141,8 +118,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Fúria contínua sem necessidade de bater/sofrer dano.',
     description: "Sua fúria só termina prematuramente se você cair inconsciente ou decidir encerrá-la voluntariamente." 
   },
-
-  // Level 16
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 16, 
@@ -150,17 +125,13 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Aumento de atributos ou novo talento.',
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 17
   { 
     name: "Crítico Brutal", 
     level: 17, 
     actionType: 'Upgrade',
     summary: '+3 dados de dano extra em acertos críticos.',
-    description: "O número de dados extras de dano ao realizar um acerto crítico com ataque corpo a corpo aumenta para três." 
+    description: "O número de dados extras de dano al realizar um acerto crítico com ataque corpo a corpo aumenta para três." 
   },
-
-  // Level 18
   { 
     name: "Força Indomável", 
     level: 18, 
@@ -168,8 +139,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Usar valor de Força como mínimo em testes.',
     description: "Se o total de um teste de Força for menor que seu valor de Força, você pode usar esse valor no lugar do resultado." 
   },
-
-  // Level 19
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 19, 
@@ -177,8 +146,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Aumento de atributos ou novo talento.',
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 20
   { 
     name: "Campeão Primitivo", 
     level: 20, 
@@ -187,8 +154,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     isKey: true,
     description: "Sua Força e Constituição aumentam em +4. O valor máximo desses atributos passa a ser 24." 
   },
-
-  // Subclasses: Path of the Berserker (Furioso)
   { 
     name: "Frenesi", 
     level: 3, 
@@ -221,8 +186,6 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
     summary: 'Ataque imediato contra quem te ferir.',
     description: "Quando uma criatura a até 1,5 metro causar dano a você, pode usar sua reação para realizar um ataque corpo a corpo contra ela." 
   },
-
-  // Subclasses: Path of the Totem Warrior (Guerreiro Totêmico)
   { 
     name: "Conselheiro Espiritual", 
     level: 3, 
@@ -266,13 +229,12 @@ export const BARBARIAN_FEATURES: FeatureInfo[] = [
 ];
 
 export const WARRIOR_FEATURES: FeatureInfo[] = [
-  // Base Class - Level 1
   { 
     name: "Estilo de Luta", 
     level: 1, 
     actionType: 'Estrutural', 
     summary: 'Bônus permanente de combate.',
-    description: "Você escolhe um estilo de combate que concede um bônus permanente, como aumento de defesa, precisão ou dano, dependendo da opção escolhida." 
+    description: "Você escolhe um estilo de combate que concede um bônus permanente, como aumento de defesa, precisão ou dano, dependendo da option escolhida." 
   },
   { 
     name: "Recuperar o Fôlego", 
@@ -281,8 +243,6 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     summary: 'Curar 1d10 + nível como ação bônus.',
     description: "Você pode usar uma ação bônus para recuperar pontos de vida iguais a 1d10 + seu nível de guerreiro. Você pode usar esta característica uma vez por descanso curto ou longo." 
   },
-  
-  // Level 2
   { 
     name: "Surto de Ação", 
     level: 2, 
@@ -291,8 +251,6 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     isKey: true,
     description: "No seu turno, você pode realizar uma ação adicional além da sua ação normal e possível ação bônus. Você pode usar esta característica uma vez por descanso curto ou longo." 
   },
-  
-  // Level 3
   { 
     name: "Arquétipo Marcial", 
     level: 3, 
@@ -300,16 +258,12 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     summary: 'Escolha de especialização de combate.',
     description: "Você escolhe um arquétipo marcial que define seu estilo de combate especializado, concedendo habilidades adicionais nos níveis 3, 7, 10, 15 e 18." 
   },
-
-  // Level 4
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 4, 
     actionType: 'Estrutural', 
     description: "Você pode aumentar um atributo em +2, ou dois atributos em +1 cada. Alternativamente, pode escolher um talento, se essa regra estiver em uso." 
   },
-
-  // Level 5
   { 
     name: "Ataque Extra", 
     level: 5, 
@@ -318,24 +272,18 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     isKey: true,
     description: "Quando você realiza a ação de Ataque no seu turno, pode atacar duas vezes em vez de uma." 
   },
-
-  // Level 6
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 6, 
     actionType: 'Estrutural', 
     description: "Você pode aumentar um atributo em +2, ou dois atributos em +1 cada. Alternativamente, pode escolher um talento, se essa regra estiver em uso." 
   },
-
-  // Level 8
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 8, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 9
   { 
     name: "Indomável", 
     level: 9, 
@@ -343,8 +291,6 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     summary: 'Rerrolar teste de resistência falho.',
     description: "Quando você falhar em um teste de resistência, pode optar por rerrolar o teste. Você deve usar o novo resultado. Esta característica pode ser usada uma vez por descanso longo." 
   },
-
-  // Level 11
   { 
     name: "Ataque Extra (2)", 
     level: 11, 
@@ -352,16 +298,12 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     summary: 'Três ataques por ação de Ataque.',
     description: "Quando você realiza a ação de Ataque no seu turno, pode atacar três vezes." 
   },
-
-  // Level 12
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 12, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 13
   { 
     name: "Indomável (2 usos)", 
     level: 13, 
@@ -369,24 +311,18 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     summary: 'Dois usos de Indomável por descanso.',
     description: "Você pode usar Indomável duas vezes entre descansos longos." 
   },
-
-  // Level 14
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 14, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 16
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 16, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 17
   { 
     name: "Surto de Ação (2 usos)", 
     level: 17, 
@@ -394,16 +330,12 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     summary: 'Dois usos de Surto de Ação por descanso.',
     description: "Você pode usar Surto de Ação duas vezes entre descansos, mas apenas uma vez no mesmo turno." 
   },
-
-  // Level 19
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 19, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 20
   { 
     name: "Ataque Extra (3)", 
     level: 20, 
@@ -412,8 +344,6 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     isKey: true,
     description: "Quando você realiza a ação de Ataque no seu turno, pode atacar quatro vezes." 
   },
-
-  // --- SUBCLASSES: CAMPEÃO ---
   { 
     name: "Crítico Aprimorado", 
     level: 3, 
@@ -454,8 +384,6 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     summary: 'Regeneração automática com pouca vida.',
     description: "No início de cada turno, se tiver menos da metade dos seus pontos de vida e não estiver incapacitado, você recupera pontos de vida automaticamente." 
   },
-
-  // --- SUBCLASSES: MESTRE DE BATALHA ---
   { 
     name: "Superioridade de Combate", 
     level: 3, 
@@ -512,8 +440,6 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
     summary: 'Dados de Superioridade tornam-se d12.',
     description: "Seus dados de superioridade aumentam para d12." 
   },
-
-  // --- SUBCLASSES: CAVALEIRO ARCANO ---
   { 
     name: "Conjuração", 
     level: 3, 
@@ -565,7 +491,6 @@ export const WARRIOR_FEATURES: FeatureInfo[] = [
 ];
 
 export const ROGUE_FEATURES: FeatureInfo[] = [
-  // Base Class - Level 1
   { 
     name: "Especialização", 
     level: 1, 
@@ -587,8 +512,6 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     actionType: 'Passiva', 
     description: "Você conhece um código secreto usado por ladrões para transmitir mensagens ocultas por meio de sinais, marcas e símbolos discretos." 
   },
-  
-  // Level 2
   { 
     name: "Ação Ardilosa", 
     level: 2, 
@@ -596,8 +519,6 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     summary: 'Ações bônus utilitárias.',
     description: "Você pode usar as ações Correr, Desengajar ou Esconder como ação bônus em cada turno." 
   },
-  
-  // Level 3
   { 
     name: "Arquétipo Ladino", 
     level: 3, 
@@ -605,16 +526,12 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     summary: 'Escolha de especialização de ladinagem.',
     description: "Você escolhe um arquétipo que define sua especialização, concedendo habilidades adicionais nos níveis 3, 9, 13 e 17." 
   },
-
-  // Level 4
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 4, 
     actionType: 'Estrutural', 
     description: "Você pode aumentar um atributo em +2, ou dois atributos em +1 cada. Alternativamente, pode escolher um talento, se essa regra estiver em uso." 
   },
-
-  // Level 5
   { 
     name: "Esquiva Sobrenatural", 
     level: 5, 
@@ -623,16 +540,12 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     isKey: true,
     description: "Quando uma criatura que você possa ver o atinge com um ataque, você pode usar sua reação para reduzir o dano sofrido pela metade." 
   },
-
-  // Level 6
   { 
     name: "Especialização", 
     level: 6, 
     actionType: 'Upgrade Estrutural', 
     description: "Você escolhe mais duas perícias ou ferramentas nas quais seu bônus de proficiência é dobrado." 
   },
-
-  // Level 7
   { 
     name: "Evasão", 
     level: 7, 
@@ -640,32 +553,24 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     summary: 'Anular dano de testes de Destreza.',
     description: "Quando fizer um teste de resistência de Destreza para sofrer apenas metade do dano, você não sofre dano algum se passar no teste, e sofre apenas metade se falhar." 
   },
-
-  // Level 8
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 8, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 9
   { 
     name: "Característica de Arquétipo Ladino", 
     level: 9, 
     actionType: 'Estrutural', 
     description: "Você recebe uma habilidade concedida pelo arquétipo escolhido." 
   },
-
-  // Level 10
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 10, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 11
   { 
     name: "Talento Confiável", 
     level: 11, 
@@ -673,24 +578,18 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     summary: 'Mínimo de 10 em dados de perícia.',
     description: "Sempre que fizer um teste de habilidade no qual seja proficiente, qualquer resultado de 9 ou menor no d20 conta como 10." 
   },
-
-  // Level 12
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 12, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 13
   { 
     name: "Característica de Arquétipo Ladino", 
     level: 13, 
     actionType: 'Estrutural', 
     description: "Você recebe uma habilidade concedida pelo arquétipo escolhido." 
   },
-
-  // Level 14
   { 
     name: "Sentidos às Cegas", 
     level: 14, 
@@ -698,8 +597,6 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     summary: 'Detectar criaturas próximas.',
     description: "Você percebe a localização de criaturas escondidas ou invisíveis a até 3 metros de distância." 
   },
-
-  // Level 15
   { 
     name: "Mente Escorregadia", 
     level: 15, 
@@ -707,24 +604,18 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     summary: 'Proficiência em salvaguardas de Sabedoria.',
     description: "Você ganha proficiência em testes de resistência de Sabedoria." 
   },
-
-  // Level 16
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 16, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 17
   { 
     name: "Característica de Arquétipo Ladino", 
     level: 17, 
     actionType: 'Estrutural', 
     description: "Você recebe uma habilidade concedida pelo arquétipo escolhido." 
   },
-
-  // Level 18
   { 
     name: "Elusivo", 
     level: 18, 
@@ -732,16 +623,12 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     summary: 'Inimigos perdem vantagem contra você.',
     description: "Nenhuma jogada de ataque tem vantagem contra você enquanto não estiver incapacitado." 
   },
-
-  // Level 19
   { 
     name: "Incremento no Valor de Habilidade", 
     level: 19, 
     actionType: 'Estrutural', 
     description: "Você recebe um novo aumento de atributos conforme as regras do sistema." 
   },
-
-  // Level 20
   { 
     name: "Golpe de Sorte", 
     level: 20, 
@@ -750,8 +637,6 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     isKey: true,
     description: "Se errar um ataque, você pode transformá-lo em um acerto. Alternativamente, se falhar em um teste de habilidade, pode tratar o resultado como 20. Esta característica pode ser usada uma vez por descanso curto ou longo." 
   },
-
-  // --- SUBCLASSES: LADRÃO ---
   { 
     name: "Mãos Rápidas", 
     level: 3, 
@@ -792,8 +677,6 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     summary: 'Dois turnos na primeira rodada.',
     description: "No primeiro turno de cada combate, você recebe dois turnos: um na sua iniciativa normal e outro na iniciativa −10. Esta característica não se aplica se você estiver surpreendido." 
   },
-
-  // --- SUBCLASSES: ASSASSINO ---
   { 
     name: "Assassinar", 
     level: 3, 
@@ -834,8 +717,6 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     summary: 'Dobrar dano contra alvos surpreendidos.',
     description: "Quando você atinge uma criatura surpreendida, ela deve realizar um teste de resistência de Constituição. Se falhar, o dano do ataque é dobrado. Este efeito se soma a outras características que dependem de surpresa." 
   },
-
-  // --- SUBCLASSES: TRAPACEIRO ARCANO ---
   { 
     name: "Conjuração", 
     level: 3, 
@@ -877,3 +758,493 @@ export const ROGUE_FEATURES: FeatureInfo[] = [
     description: "Quando uma criatura conjura uma magia contra você e você é alvo ou está na área de efeito, você pode usar sua reação para forçar a criatura a realizar um teste de resistência. Se a criatura falhar: a magia não tem efeito contra você; você aprende essa magia temporariamente; pode conjurá-la uma vez usando seus próprios espaços de magia. Após conjurar a magia roubada, ela é esquecida." 
   },
 ];
+
+export const PALADIN_FEATURES: FeatureInfo[] = [
+  {
+    name: "Sentido Divino",
+    level: 1,
+    actionType: "Ativa – Recurso",
+    description: "Como ação, você pode detectar celestiais, ínferos e mortos-vivos a até 18 metros. Usos por descanso longo: 1 + modificador de Carisma."
+  },
+  {
+    name: "Cura pelas Mãos",
+    level: 1,
+    actionType: "Ativa – Recurso",
+    description: "Você possui uma reserva de cura igual a 5 × nível de Paladino. Como ação, pode tocar uma criatura e restaurar qualquer quantidade de pontos da reserva. Pode gastar 5 pontos para curar doença ou neutralizar veneno."
+  },
+  {
+    name: "Estilo de Combate",
+    level: 2,
+    actionType: "Estrutural / Passiva",
+    description: "Escolha um Estilo de Combate da lista do Paladino. Após escolhido, o efeito é permanente e não consome recurso."
+  },
+  {
+    name: "Conjuração",
+    level: 2,
+    actionType: "Estrutural",
+    description: "Atributo de conjuração: Carisma. Tipo: Magias Preparadas. Você pode preparar: Carisma + metade do nível de Paladino (arredondado para baixo). Segue tabela de espaços de magia de meio conjurador (Half Caster)."
+  },
+  {
+    name: "Golpe Divino",
+    level: 2,
+    actionType: "Passiva / Condicional",
+    description: "Quando acerta um ataque corpo a corpo, pode gastar um espaço de magia para causar dano radiante adicional. O dano aumenta conforme o nível do espaço gasto."
+  },
+  {
+    name: "Saúde Divina",
+    level: 3,
+    actionType: "Passiva",
+    description: "Você é imune a doenças."
+  },
+  {
+    name: "Juramento Sagrado",
+    level: 3,
+    actionType: "Estrutural",
+    description: "Escolha um Juramento. Recebe habilidades nos níveis 3, 7, 15 e 20."
+  },
+  {
+    name: "Canalizar Divindade",
+    level: 3,
+    actionType: "Recurso",
+    description: "Você pode usar Canalizar Divindade uma vez por descanso curto ou longo. Os efeitos dependem do Juramento escolhido."
+  },
+  {
+    name: "Incremento no Valor de Habilidade",
+    level: 4,
+    actionType: "Estrutural",
+    description: "Você pode aumentar um atributo em +2, ou dois atributos em +1 cada. Alternativamente, pode escolher um talento, se essa regra estiver em uso."
+  },
+  {
+    name: "Ataque Extra",
+    level: 5,
+    actionType: "Upgrade",
+    description: "Pode atacar duas vezes ao usar a ação de Ataque."
+  },
+  {
+    name: "Aura de Proteção",
+    level: 6,
+    actionType: "Passiva",
+    description: "Você e aliados a até 3 metros adicionam seu modificador de Carisma a testes de resistência."
+  },
+  {
+    name: "Incremento no Valor de Habilidade",
+    level: 8,
+    actionType: "Estrutural",
+    description: "Você recebe um novo aumento de atributos conforme as regras do sistema."
+  },
+  {
+    name: "Aura de Coragem",
+    level: 10,
+    actionType: "Passiva",
+    description: "Você e aliados a até 3 metros não podem ser amedrontados."
+  },
+  {
+    name: "Golpe Divino Aprimorado",
+    level: 11,
+    actionType: "Upgrade",
+    description: "Seus ataques corpo a corpo causam 1d8 de dano radiante adicional."
+  },
+  {
+    name: "Incremento no Valor de Habilidade",
+    level: 12,
+    actionType: "Estrutural",
+    description: "Você recebe um novo aumento de atributos conforme as regras do sistema."
+  },
+  {
+    name: "Purificar Toque",
+    level: 14,
+    actionType: "Ativa – Recurso",
+    description: "Você pode encerrar uma magia em si ou em outra criatura. Usos por descanso longo: igual ao modificador de Carisma."
+  },
+  {
+    name: "Incremento no Valor de Habilidade",
+    level: 16,
+    actionType: "Estrutural",
+    description: "Você recebe um novo aumento de atributos conforme as regras do sistema."
+  },
+  {
+    name: "Auras Aprimoradas",
+    level: 18,
+    actionType: "Upgrade",
+    description: "O alcance das suas auras aumenta para 9 metros."
+  },
+  {
+    name: "Incremento no Valor de Habilidade",
+    level: 19,
+    actionType: "Estrutural",
+    description: "Você recebe um novo aumento de atributos conforme as regras do sistema."
+  },
+  {
+    name: "Magias do Juramento",
+    level: 3,
+    subclass: "Juramento dos Antigos",
+    actionType: "Estrutural – Sempre Preparadas",
+    description: "Você sempre tem estas magias preparadas. Elas NÃO contam no limite normal de magias preparadas.\n\nNível 3:\n- Enredar\n- Falar com Animais"
+  },
+  {
+    name: "Canalizar Divindade — Ira da Natureza",
+    level: 3,
+    subclass: "Juramento dos Antigos",
+    actionType: "Ativa – Recurso",
+    description: "Como ação, você invoca vinhas espectrais para prender uma criatura. A criatura deve realizar um teste de resistência. Se falhar, fica restrita. Pode repetir o teste no final de cada turno."
+  },
+  {
+    name: "Canalizar Divindade — Afastar os Infiéis",
+    level: 3,
+    subclass: "Juramento dos Antigos",
+    actionType: "Ativa – Recurso",
+    description: "Como ação, você apresenta seu símbolo sagrado. Fadas e ínferos que falharem no teste de resistência ficam amedrontados e devem fugir."
+  },
+  {
+    name: "Magias do Juramento (Nível 5)",
+    level: 5,
+    subclass: "Juramento dos Antigos",
+    actionType: "Sempre Preparadas",
+    description: "Você sempre tem estas magias preparadas. Elas NÃO contam no limite normal de magias preparadas.\n\nNível 5:\n- Passo Nebuloso\n- Raio Lunar"
+  },
+  {
+    name: "Aura de Proteção Mágica",
+    level: 7,
+    subclass: "Juramento dos Antigos",
+    actionType: "Passiva",
+    description: "Você e aliados a até 3 metros têm resistência a dano causado por magias. No nível 18, o alcance aumenta para 9 metros."
+  },
+  {
+    name: "Magias do Juramento (Nível 9)",
+    level: 9,
+    subclass: "Juramento dos Antigos",
+    actionType: "Sempre Preparadas",
+    description: "Nível 9: Crescimento de Plantas, Proteção contra Energia"
+  },
+  {
+    name: "Magias do Juramento (Nível 13)",
+    level: 13,
+    subclass: "Juramento dos Antigos",
+    actionType: "Sempre Preparadas",
+    description: "Nível 13: Pele Rochosa, Muralha de Fogo"
+  },
+  {
+    name: "Guardião Imortal",
+    level: 15,
+    subclass: "Juramento dos Antigos",
+    actionType: "Passiva – Recurso",
+    description: "Quando for reduzido a 0 pontos de vida, você pode cair para 1 ponto de vida em vez disso. Pode usar este efeito uma vez por descanso longo. Além disso, você não sofre efeitos de envelhecimento mágico."
+  },
+  {
+    name: "Magias do Juramento (Nível 17)",
+    level: 17,
+    subclass: "Juramento dos Antigos",
+    actionType: "Sempre Preparadas",
+    description: "Nível 17: Comunhão com a Natureza, Árvore Despertada"
+  },
+  {
+    name: "Campeão Ancestral",
+    level: 20,
+    subclass: "Juramento dos Antigos",
+    actionType: "Ativa – Transformação",
+    description: "Como ação, por 1 minuto:\n- Você recupera 10 pontos de vida no início de cada turno.\n- Pode conjurar magias de Paladino de 1º nível como ação bônus.\n- Criaturas inimigas na aura têm desvantagem em testes de resistência contra suas magias e Canalizar Divindade.\nUsável uma vez por descanso longo."
+  },
+  {
+    name: "Magias do Juramento",
+    level: 3,
+    subclass: "Juramento de Vingança",
+    actionType: "Estrutural – Sempre Preparadas",
+    description: "Você sempre tem estas magias preparadas. Elas NÃO contam no limite normal de magias preparadas.\n\nNível 3:\n- Perdição\n- Marca do Caçador"
+  },
+  {
+    name: "Canalizar Divindade — Voto de Inimizade",
+    level: 3,
+    subclass: "Juramento de Vingança",
+    actionType: "Ativa – Recurso",
+    description: "Como ação bônus, você escolhe uma criatura a até 3 metros. Você tem vantagem em jogadas de ataque contra essa criatura por 1 minuto. Não requer concentração."
+  },
+  {
+    name: "Canalizar Divindade — Abjurar Inimigo",
+    level: 3,
+    subclass: "Juramento de Vingança",
+    actionType: "Ativa – Recurso",
+    description: "Como ação, você escolhe uma criatura. A criatura deve realizar um teste de resistência. Se falhar: fica amedrontada e tem deslocamento reduzido a 0. Se tiver sucesso: deslocamento é reduzido pela metade."
+  },
+  {
+    name: "Magias do Juramento (Nível 5)",
+    level: 5,
+    subclass: "Juramento de Vingança",
+    actionType: "Sempre Preparadas",
+    description: "Nível 5:\n- Passo Nebuloso\n- Imobilizar Pessoa"
+  },
+  {
+    name: "Vingador Implacável",
+    level: 7,
+    subclass: "Juramento de Vingança",
+    actionType: "Passiva",
+    description: "Quando atinge uma criatura com um ataque de oportunidade, você pode se mover até metade do seu deslocamento, sem provocar ataques de oportunidade."
+  },
+  {
+    name: "Magias do Juramento (Nível 9)",
+    level: 9,
+    subclass: "Juramento de Vingança",
+    actionType: "Sempre Preparadas",
+    description: "Nível 9:\n- Acelerar\n- Proteção contra Energia"
+  },
+  {
+    name: "Magias do Juramento (Nível 13)",
+    level: 13,
+    subclass: "Juramento de Vingança",
+    actionType: "Sempre Preparadas",
+    description: "Nível 13:\n- Banimento\n- Porta Dimensional"
+  },
+  {
+    name: "Alma da Vingança",
+    level: 15,
+    subclass: "Juramento de Vingança",
+    actionType: "Passiva / Condicional",
+    description: "Quando uma criatura sob efeito de seu Voto de Inimizade realiza um ataque, você pode usar sua reação para realizar um ataque corpo a corpo contra ela."
+  },
+  {
+    name: "Magias do Juramento (Nível 17)",
+    level: 17,
+    subclass: "Juramento de Vingança",
+    actionType: "Sempre Preparadas",
+    description: "Nível 17:\n- Imobilizar Monstro\n- Vidência"
+  },
+  {
+    name: "Anjo da Vingança",
+    level: 20,
+    subclass: "Juramento de Vingança",
+    actionType: "Ativa – Transformação",
+    description: "Como ação, por 1 hora:\n- Você ganha asas e deslocamento de voo.\n- Criaturas inimigas a até 9 metros devem realizar teste de resistência.\n- Se falharem, ficam amedrontadas.\nUsável uma vez por descanso longo."
+  },
+  {
+    name: "Magias do Juramento",
+    level: 3,
+    subclass: "Juramento da Devoção",
+    actionType: "Estrutural – Sempre Preparadas",
+    description: "Você sempre tem estas magias preparadas. Elas NÃO contam no limite normal de magias preparadas. Nível 3: Proteção contra o Bem e o Mal, Santuário."
+  },
+  {
+    name: "Canalizar Divindade — Arma Sagrada",
+    level: 3,
+    subclass: "Juramento da Devoção",
+    actionType: "Ativa – Recurso",
+    description: "Como ação, você imbui uma arma com energia divina por 1 minuto. Adiciona seu modificador de Carisma às jogadas de ataque. A arma emite luz brilhante. Se não for mágica, torna-se mágica durante a duração."
+  },
+  {
+    name: "Canalizar Divindade — Afastar o Profano",
+    level: 3,
+    subclass: "Juramento da Devoção",
+    actionType: "Ativa – Recurso",
+    description: "Como ação, você apresenta seu símbolo sagrado. Ínferos e mortos-vivos que falharem no teste de resistência ficam amedrontados e devem fugir."
+  },
+  {
+    name: "Magias do Juramento (Nível 5)",
+    level: 5,
+    subclass: "Juramento da Devoção",
+    actionType: "Sempre Preparadas",
+    description: "Nível 5: Restauração Menor, Zona da Verdade."
+  },
+  {
+    name: "Aura de Devoção",
+    level: 7,
+    subclass: "Juramento da Devoção",
+    actionType: "Passiva",
+    description: "Você e aliados a até 3 metros não podem ser enfeitiçados. No nível 18, alcance aumenta para 9 metros."
+  },
+  {
+    name: "Magias do Juramento (Nível 9)",
+    level: 9,
+    subclass: "Juramento da Devoção",
+    actionType: "Sempre Preparadas",
+    description: "Nível 9: Farol da Esperança, Dissipar Magia."
+  },
+  {
+    name: "Magias do Juramento (Nível 13)",
+    level: 13,
+    subclass: "Juramento da Devoção",
+    actionType: "Sempre Preparadas",
+    description: "Nível 13: Liberdade de Movimento, Guardião da Fé."
+  },
+  {
+    name: "Pureza de Espírito",
+    level: 15,
+    subclass: "Juramento da Devoção",
+    actionType: "Passiva",
+    description: "Você está permanentemente sob os efeitos de Proteção contra o Bem e o Mal. Não requer concentração."
+  },
+  {
+    name: "Magias do Juramento (Nível 17)",
+    level: 17,
+    subclass: "Juramento da Devoção",
+    actionType: "Sempre Preparadas",
+    description: "Nível 17: Comunhão, Golpe Flamejante."
+  },
+  {
+    name: "Halo Sagrado",
+    level: 20,
+    subclass: "Juramento da Devoção",
+    actionType: "Ativa – Transformação",
+    description: "Como ação, você emana luz radiante por 1 minuto. Criaturas inimigas na luz sofrem dano radiante. Ínferos e mortos-vivos têm desvantagem contra suas magias. Você tem vantagem em testes de resistência contra magias deles. Usável uma vez por descanso longo."
+  }
+];
+
+export const RANGER_FEATURES: FeatureInfo[] = [
+  {
+    name: "Inimigo Favorecido",
+    level: 1,
+    actionType: "Estrutural / Passiva",
+    description: "Ao escolher Patrulheiro, você seleciona um tipo de inimigo favored. Você tem vantagem em testes de Sabedoria (Sobrevivência) para rastrear esse tipo e em testes de Inteligência para recordar informações sobre ele. Você aprende um idioma falado por esse tipo."
+  },
+  {
+    name: "Explorador Nato",
+    level: 1,
+    actionType: "Estrutural / Passiva",
+    description: "Você seleciona um terreno favoured. Ao viajar por ele por 1 hora ou mais: terreno difícil não reduz velocidade; o grupo não se perde; você permanece alerta mesmo engajado em outras atividades; pode mover-se furtivamente em ritmo normal se estiver sozinho; encontra o dobro de alimento; aprende número e tamanho de criaturas rastreadas."
+  },
+  {
+    name: "Estilo de Combate",
+    level: 2,
+    actionType: "Estrutural / Passiva",
+    description: "Você adota um estilo de combate particular como sua especialidade."
+  },
+  {
+    name: "Conjuração",
+    level: 2,
+    actionType: "Estrutural",
+    description: "Atributo: SAB. Tipo: Magias Conhecidas. CD = 8 + prof + mod(SAB). Ataque = prof + mod(SAB). Segue tabela de meio conjurador."
+  },
+  {
+    name: "Arquétipo de Patrulheiro",
+    level: 3,
+    actionType: "Estrutural",
+    description: "Você escolhe um arquétipo que define sua maestria. Este tomo implementa o arquétipo Caçador."
+  },
+  {
+    name: "Incremento no Valor de Habilidade",
+    level: 4,
+    actionType: "Estrutural",
+    description: "Aumente um atributo em +2 ou dois em +1, ou escolha um talento."
+  },
+  {
+    name: "Ataque Extra",
+    level: 5,
+    actionType: "Upgrade",
+    description: "Ao usar a ação de Ataque, pode atacar duas vezes."
+  },
+  {
+    name: "Passos Ligeiros",
+    level: 8,
+    actionType: "Passiva",
+    description: "Mover-se através de terreno difícil não-mágico não custa movimento extra. Atravessa plantas não-mágicas sem redução ou dano. Vantagem contra plantas mágicas de impedimento."
+  },
+  {
+    name: "Ocultar-se em Plena Vista",
+    level: 10,
+    actionType: "Ativa / Preparação",
+    description: "Pode gastar 1 minuto criando camuflagem natural. Enquanto permanecer imóvel, recebe +10 em Furtividade."
+  },
+  {
+    name: "Desaparecer",
+    level: 14,
+    actionType: "Passiva / Upgrade",
+    description: "Pode usar Esconder como ação bônus. Não pode ser rastreado por meios não-mágicos a menos que queira."
+  },
+  {
+    name: "Sentidos Selvagens",
+    level: 18,
+    actionType: "Passiva",
+    description: "Você ganha percepção aprimorada contra inimigos invisíveis ou ocultos conforme PHB."
+  },
+  {
+    name: "Matador de Inimigos",
+    level: 20,
+    actionType: "Passiva / Upgrade",
+    description: "Uma vez por turno, pode adicionar seu mod de SAB a uma jogada de ataque OU dano contra um inimigo favorecido."
+  }
+];
+
+export const HUNTER_FEATURES: Record<number, FeatureInfo[]> = {
+  3: [
+    {
+      name: "Matador de Colossos",
+      level: 3,
+      subclass: "Caçador",
+      actionType: "Passiva / Condicional",
+      description: "Uma vez por turno, quando você atinge uma criatura que esteja abaixo de seus pontos de vida máximos, você causa +1d8 de dano adicional ao alvo."
+    },
+    {
+      name: "Assassino de Gigantes",
+      level: 3,
+      subclass: "Caçador",
+      actionType: "Reação / Condicional",
+      description: "Quando uma criatura Grande ou maior erra um ataque corpo a corpo contra você, você pode usar sua reação para fazer um ataque contra essa criatura."
+    },
+    {
+      name: "Matador de Hordas",
+      level: 3,
+      subclass: "Caçador",
+      actionType: "Passiva / Condicional",
+      description: "Uma vez por turno, quando você realiza um ataque com arma, você pode fazer outro ataque com a mesma arma contra uma criatura diferente que esteja a até 1,5m do alvo original e dentro do alcance da arma."
+    }
+  ],
+  7: [
+    {
+      name: "Escapar da Horda",
+      level: 7,
+      subclass: "Caçador",
+      actionType: "Passiva",
+      description: "Ataques de oportunidade contra você são feitos com desvantagem."
+    },
+    {
+      name: "Defesa contra Ataques Múltiplos",
+      level: 7,
+      subclass: "Caçador",
+      actionType: "Passiva / Reativa",
+      description: "Quando uma criatura o atinge com um ataque, você ganha +4 de CA contra todos os ataques subsequentes feitos por essa criatura até o fim do turno dela."
+    },
+    {
+      name: "Vontade de Aço",
+      level: 7,
+      subclass: "Caçador",
+      actionType: "Passiva",
+      description: "Você tem vantagem em testes de resistência contra ser amedrontado."
+    }
+  ],
+  11: [
+    {
+      name: "Ataque Giratório",
+      level: 11,
+      subclass: "Caçador",
+      actionType: "Ativa",
+      description: "Como ação, você pode realizar um ataque corpo a corpo contra qualquer número de criaturas dentro de 1,5m de você, fazendo uma jogada de ataque separada para cada alvo."
+    },
+    {
+      name: "Chuva de Flechas",
+      level: 11,
+      subclass: "Caçador",
+      actionType: "Ativa",
+      description: "Como ação, você pode fazer um ataque à distância contra qualquer número de criaturas dentro de 3m de um ponto que você possa ver dentro do alcance da arma, realizando uma jogada de ataque separada para cada alvo."
+    }
+  ],
+  15: [
+    {
+      name: "Evasão",
+      level: 15,
+      subclass: "Caçador",
+      actionType: "Passiva",
+      description: "Quando você for submetido a um efeito que permita realizar um teste de resistência de Destreza para sofrer metade do dano, você não sofre dano se for bem-sucedido, e sofre apenas metade do dano se falhar."
+    },
+    {
+      name: "Suportar a Maré",
+      level: 15,
+      subclass: "Caçador",
+      actionType: "Reação / Condicional",
+      description: "Quando uma criatura errar um ataque corpo a corpo contra você, você pode usar sua reação para forçar que esse ataque atinja outra criatura de sua escolha, diferente do atacante, que esteja a até 1,5m dele."
+    },
+    {
+      name: "Esquiva Sobrenatural",
+      level: 15,
+      subclass: "Caçador",
+      actionType: "Reação",
+      description: "Quando um atacante que você possa ver o atinge com um ataque, você pode usar sua reação para reduzir o dano pela metade."
+    }
+  ]
+};

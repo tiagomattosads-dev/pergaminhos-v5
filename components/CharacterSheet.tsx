@@ -1,5 +1,6 @@
+
 import React, { useMemo, useRef, useState, useEffect } from 'react';
-import { Character, Attribute, Skill, Weapon, OtherAttack } from '../types';
+import { Character, Attribute, Skill, Weapon, OtherAttack, Companion, CompanionAttack } from '../types';
 import { SKILLS, CLASSES_PHB, getLevelFromXP, getProficiencyFromLevel, SUBCLASSES_PHB } from '../constants';
 import { translations, attributeTranslations, attributeAbbreviations, skillTranslations, classTranslations, raceTranslations, alignmentTranslations } from '../translations';
 
@@ -11,6 +12,25 @@ interface Props {
   abbreviateAttributes?: boolean;
 }
 
+const DEFAULT_COMPANION: Companion = {
+  enabled: true,
+  name: "Companheiro",
+  species: "Lobo",
+  stats: {
+    [Attribute.FOR]: 12, [Attribute.DES]: 15, [Attribute.CON]: 12,
+    [Attribute.INT]: 3, [Attribute.SAB]: 12, [Attribute.CAR]: 6
+  },
+  ac: 13,
+  hp: { current: 11, max: 11 },
+  hitDice: "2d8",
+  speed: "12m",
+  initiative: 0,
+  skillsProficient: [],
+  attacks: [],
+  personalityTrait: "",
+  flaw: ""
+};
+
 const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUpload, theme = 'light', abbreviateAttributes = false }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -18,6 +38,7 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
   const [hpTab, setHpTab] = useState<'hp' | 'death'>('hp');
   const [isClassDropdownOpen, setIsClassDropdownOpen] = useState(false);
   const [portraitError, setPortraitError] = useState(false);
+  const [isCompanionExpanded, setIsCompanionExpanded] = useState(true);
   
   const lang = character.language || 'pt';
   const t = translations[lang];
@@ -128,7 +149,6 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
       classMetadata: CLASSES_PHB[selectedClass] 
     };
 
-    // Limpar estilos de luta se deixar de ser Guerreiro
     if (selectedClass !== "Guerreiro") {
       updates.fightingStyles = [];
     }
@@ -143,6 +163,28 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
 
     updateCharacter(updates);
     setIsClassDropdownOpen(false);
+  };
+
+  const isCompanionVisible = character.class === "Patrulheiro" && 
+                             character.subclass === "Mestre das Bestas" && 
+                             character.level >= 3;
+
+  const updateCompanion = (updates: Partial<Companion>) => {
+    updateCharacter({ companion: { ...(character.companion || DEFAULT_COMPANION), ...updates } });
+  };
+
+  const toggleCompanionSkill = (skillName: string) => {
+    const current = character.companion?.skillsProficient || [];
+    const idx = current.indexOf(skillName);
+    let next = [...current];
+    if (idx > -1) next.splice(idx, 1);
+    else if (current.length < 2) next.push(skillName);
+    updateCompanion({ skillsProficient: next });
+  };
+
+  const addCompanionAttack = () => {
+    const next = [...(character.companion?.attacks || []), { name: "Mordida", type: "Corpo a Corpo", reach: "1.5m", bonus: "+0", damage: "1d6" }];
+    updateCompanion({ attacks: next });
   };
 
   return (
@@ -548,6 +590,24 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                           <input value={a.range} onChange={(e) => { const next = [...character.otherAttacks]; next[idx].range = e.target.value; updateCharacter({ otherAttacks: next }); }} className={`bg-transparent w-full text-center font-bold outline-none ${isDark ? 'text-[#e8d5b5]' : ''}`} />
                         </div>
                       </div>
+                      <div className="mt-2">
+                        <textarea
+                          placeholder={lang === 'pt' ? "Propriedades ou descrição do ataque..." : "Attack properties or description..."}
+                          value={a.description || ''}
+                          onChange={(e) => {
+                            const next = [...character.otherAttacks];
+                            next[idx].description = e.target.value;
+                            updateCharacter({ otherAttacks: next });
+                          }}
+                          className={`w-full bg-transparent font-sans text-[12px] focus:outline-none resize-none overflow-hidden min-h-[1.5rem] border-t border-black/5 pt-1 ${isDark ? 'text-[#e8d5b5]/60 placeholder:text-white/5 border-white/5' : 'text-[#3e2723]/60 placeholder:text-black/5'}`}
+                          rows={1}
+                          onInput={(e) => {
+                            const target = e.target as HTMLTextAreaElement;
+                            target.style.height = 'auto';
+                            target.style.height = target.scrollHeight + 'px';
+                          }}
+                        />
+                      </div>
                     </div>
                   ))
                 )
@@ -556,9 +616,9 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
               <button 
                 onClick={() => {
                   if (combatTab === 'weapons') {
-                    updateCharacter({ weapons: [...character.weapons, { name: t.new_weapon, bonus: '+0', damage: '1d6', type: '1 Mão' }] });
+                    updateCharacter({ weapons: [...character.weapons, { name: t.new_weapon, bonus: '+0', damage: '1d6', type: '1 Mão', description: '' }] });
                   } else {
-                    updateCharacter({ otherAttacks: [...character.otherAttacks, { name: t.new_attack, bonus: '+0', damage: '1d6', range: '1.5m' }] });
+                    updateCharacter({ otherAttacks: [...character.otherAttacks, { name: t.new_attack, bonus: '+0', damage: '1d6', range: '1.5m', description: '' }] });
                   }
                 }}
                 className={`mt-4 w-full py-2.5 rounded-xl border-2 border-dashed cinzel text-[10px] font-bold uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 ${
@@ -572,6 +632,287 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
           </div>
         </section>
       </div>
+
+      {/* SUBFICHA DO COMPANHEIRO ANIMAL */}
+      {isCompanionVisible && (
+        <section className={`mt-12 border-4 rounded-[2.5rem] overflow-hidden shadow-2xl transition-all ${
+          isDark ? 'bg-[#1a1a1a] border-[#d4af37]/20' : 'bg-[#fdf5e6] border-[#8b4513]/80'
+        }`}>
+          <button 
+            onClick={() => setIsCompanionExpanded(!isCompanionExpanded)}
+            className={`w-full p-6 flex justify-between items-center border-b-4 transition-colors ${
+              isDark ? 'bg-black/40 border-white/5 hover:bg-black/60' : 'bg-[#8b4513]/10 border-[#8b4513]/20 hover:bg-[#8b4513]/20'
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center ${isDark ? 'border-[#d4af37] text-[#d4af37]' : 'border-[#8b4513] text-[#8b4513]'}`}>
+                 <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+              </div>
+              <h2 className={`fantasy-title text-3xl sm:text-4xl ${isDark ? 'text-[#d4af37]' : 'text-[#3e2723]'}`}>{t.companion_title}</h2>
+            </div>
+            <svg className={`w-8 h-8 transition-transform duration-500 ${isCompanionExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {isCompanionExpanded && (
+            <div className="p-6 sm:p-10 flex flex-col gap-10">
+              
+              {/* SEÇÃO A: IDENTIDADE */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="flex flex-col gap-2">
+                    <label className="cinzel text-[10px] font-bold uppercase tracking-widest opacity-60">{t.companion_name}</label>
+                    <input 
+                      value={character.companion?.name || "Companheiro"} 
+                      onChange={e => updateCompanion({ name: e.target.value })}
+                      className={`bg-transparent border-b-2 fantasy-title text-2xl outline-none py-2 ${isDark ? 'border-white/10 focus:border-[#d4af37] text-[#e8d5b5]' : 'border-[#8b4513]/20 focus:border-[#8b4513] text-[#3e2723]'}`}
+                    />
+                 </div>
+                 <div className="flex flex-col gap-2">
+                    <label className="cinzel text-[10px] font-bold uppercase tracking-widest opacity-60">{t.companion_species}</label>
+                    <input 
+                      placeholder="Lobo, Pantera, Javali..."
+                      value={character.companion?.species || ""} 
+                      onChange={e => updateCompanion({ species: e.target.value })}
+                      className={`bg-transparent border-b-2 fantasy-title text-2xl outline-none py-2 ${isDark ? 'border-white/10 focus:border-[#d4af37] text-[#e8d5b5]' : 'border-[#8b4513]/20 focus:border-[#8b4513] text-[#3e2723]'}`}
+                    />
+                    <p className="text-[10px] italic opacity-40 leading-tight mt-1">
+                      “Em geral, uma besta pode servir como companheiro se for Média ou menor, tiver 15 ou menos PV e ND 1/4 ou menor.”
+                    </p>
+                 </div>
+              </div>
+
+              {/* SEÇÃO B: DEFESA E VIDA */}
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                 {[
+                   { label: t.armor, value: character.companion?.ac || 10, key: 'ac' },
+                   { label: t.hp, value: character.companion?.hp.current || 10, key: 'hp.current' },
+                   { label: t.hp_max, value: character.companion?.hp.max || 10, key: 'hp.max' },
+                   { label: t.hit_dice, value: character.companion?.hitDice || '1d8', key: 'hitDice', type: 'text' },
+                   { label: t.speed, value: character.companion?.speed || '12m', key: 'speed', type: 'text' },
+                   { label: t.initiative, value: character.companion?.initiative || 0, key: 'initiative' }
+                 ].map(stat => (
+                   <div key={stat.key} className={`border-2 rounded-2xl p-3 text-center shadow-lg ${isDark ? 'bg-black/20 border-white/5' : 'bg-white border-[#8b4513]/30'}`}>
+                      <span className="block text-[8px] cinzel font-bold uppercase tracking-widest mb-1 opacity-60">{stat.label}</span>
+                      <input 
+                        type={stat.type === 'text' ? 'text' : 'number'}
+                        value={stat.value}
+                        onChange={e => {
+                          const val = stat.type === 'text' ? e.target.value : parseInt(e.target.value) || 0;
+                          if (stat.key.includes('.')) {
+                             const [obj, field] = stat.key.split('.');
+                             const parent = (character.companion as any)[obj];
+                             updateCompanion({ [obj]: { ...parent, [field]: val } });
+                          } else {
+                             updateCompanion({ [stat.key]: val });
+                          }
+                        }}
+                        className={`bg-transparent w-full text-center fantasy-title text-xl outline-none font-bold ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}
+                      />
+                   </div>
+                 ))}
+                 <p className="col-span-full text-[10px] italic opacity-40 text-center mt-2">
+                    “O companheiro rola iniciativa como qualquer criatura. Você decide as ações dele.”
+                 </p>
+              </div>
+
+              {/* SEÇÃO C: ATRIBUTOS DO COMPANHEIRO */}
+              <div className={`p-6 rounded-3xl border-2 ${isDark ? 'bg-black/20 border-white/5' : 'bg-[#8b4513]/5 border-[#8b4513]/10'}`}>
+                 <h3 className="cinzel text-xs font-bold text-center mb-6 uppercase tracking-widest">{t.attributes} do Animal</h3>
+                 <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                    {(Object.values(Attribute)).map(attr => {
+                      const score = character.companion?.stats[attr] || 10;
+                      const mod = getModifier(score);
+                      return (
+                        <div key={attr} className="flex flex-col items-center gap-1">
+                           <span className="text-[10px] cinzel font-bold opacity-60">{abbreviateAttributes ? attrAbbrT[attr][lang] : attr}</span>
+                           <div className={`w-14 h-14 rounded-xl border-2 flex flex-col items-center justify-center shadow-inner ${isDark ? 'bg-black/40 border-white/10' : 'bg-white border-[#8b4513]/20'}`}>
+                              <input 
+                                type="number"
+                                value={score}
+                                onChange={e => {
+                                  const stats = { ...(character.companion?.stats || DEFAULT_COMPANION.stats), [attr]: parseInt(e.target.value) || 0 };
+                                  updateCompanion({ stats });
+                                }}
+                                className={`w-full text-center fantasy-title text-lg bg-transparent outline-none focus:text-[#d4af37] ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}
+                              />
+                              <span className="text-[10px] font-bold opacity-50">{mod >= 0 ? `+${mod}` : mod}</span>
+                           </div>
+                        </div>
+                      );
+                    })}
+                 </div>
+                 <p className="text-[10px] italic opacity-40 text-center mt-6">
+                    “Quando o Patrulheiro recebe Incremento no Valor de Habilidade, o companheiro também recebe.”
+                 </p>
+              </div>
+
+              {/* SEÇÃO D: VÍNCULO (REGRAS) */}
+              <div className={`p-8 rounded-[2rem] border-2 border-dashed ${isDark ? 'bg-[#d4af37]/5 border-[#d4af37]/20' : 'bg-orange-50 border-[#8b4513]/30'}`}>
+                 <h3 className={`fantasy-title text-2xl mb-4 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{t.companion_bond}</h3>
+                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs italic opacity-80 leading-relaxed">
+                    <li className="flex gap-2"><span>•</span> {t.companion_ac_note}</li>
+                    <li className="flex gap-2"><span>•</span> Ele usa sua proficiência (+{profBonus}) no lugar da própria.</li>
+                    <li className="flex gap-2"><span>•</span> Ele se torna proficiente em todos os testes de resistência.</li>
+                    <li className="flex gap-2"><span>•</span> Ele ganha proficiência em duas perícias à sua escolha.</li>
+                    <li className="flex gap-2"><span>•</span> Ele ganha 1 HD extra para cada nível seu acima do 3º.</li>
+                    <li className="flex gap-2"><span>•</span> Se tiver Ataque Múltiplo no bloco original, ele perde essa ação.</li>
+                 </ul>
+              </div>
+
+              {/* SEÇÃO E: SALVAGUARDAS E PERÍCIAS */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                 <div className={`p-6 rounded-3xl border-2 ${isDark ? 'bg-black/20 border-white/5' : 'bg-white border-[#8b4513]/10'}`}>
+                    <h4 className="cinzel text-[10px] font-bold mb-4 uppercase tracking-widest">{t.saves} (Todos Proficientes)</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                       {Object.values(Attribute).map(attr => {
+                          const mod = getModifier(character.companion?.stats[attr] || 10) + profBonus;
+                          return (
+                            <div key={attr} className={`flex items-center gap-2 p-2 rounded border ${isDark ? 'bg-white/5 border-white/5' : 'bg-[#8b4513]/5 border-[#8b4513]/10'}`}>
+                               <div className={`w-3 h-3 rounded-full ${isDark ? 'bg-[#d4af37]' : 'bg-[#8b4513] shadow-sm'}`}></div>
+                               <span className="font-bold text-sm w-6 text-center">{mod >= 0 ? `+${mod}` : mod}</span>
+                               <span className="text-[10px] cinzel font-bold opacity-70">{attr}</span>
+                            </div>
+                          );
+                       })}
+                    </div>
+                 </div>
+
+                 <div className={`p-6 rounded-3xl border-2 ${isDark ? 'bg-black/20 border-white/5' : 'bg-white border-[#8b4513]/10'}`}>
+                    <h4 className="cinzel text-[10px] font-bold mb-4 uppercase tracking-widest">{t.companion_skills}</h4>
+                    <div className="flex flex-col gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                       {SKILLS.map(skill => {
+                          const isProf = (character.companion?.skillsProficient || []).includes(skill.name);
+                          const mod = getModifier(character.companion?.stats[skill.attribute] || 10) + (isProf ? profBonus : 0);
+                          return (
+                            <button 
+                              key={skill.name}
+                              onClick={() => toggleCompanionSkill(skill.name)}
+                              className={`flex items-center gap-3 p-1.5 rounded transition-all text-left ${isProf ? (isDark ? 'bg-[#d4af37]/20 border border-[#d4af37]/30' : 'bg-[#8b4513]/10 border border-[#8b4513]/20') : 'hover:bg-black/5 opacity-60'}`}
+                            >
+                               <div className={`w-3.5 h-3.5 border rounded flex items-center justify-center ${isProf ? (isDark ? 'bg-[#d4af37] border-white' : 'bg-[#8b4513] border-[#8b4513]') : 'border-current'}`}>
+                                  {isProf && <div className="w-1 h-1 bg-white rounded-full"></div>}
+                               </div>
+                               <span className="font-bold text-sm w-6 text-center">{mod >= 0 ? `+${mod}` : mod}</span>
+                               <span className="text-[11px] cinzel font-bold uppercase truncate">{skillTranslations[skill.name]?.[lang] || skill.name}</span>
+                            </button>
+                          );
+                       })}
+                    </div>
+                 </div>
+              </div>
+
+              {/* SEÇÃO F: ATAQUES DO COMPANHEIRO */}
+              <div className={`p-6 rounded-3xl border-2 ${isDark ? 'bg-black/20 border-white/5' : 'bg-white border-[#8b4513]/10'}`}>
+                 <div className="flex justify-between items-center mb-6">
+                    <h4 className="cinzel text-[10px] font-bold uppercase tracking-widest">{t.companion_attacks}</h4>
+                    <button 
+                      onClick={addCompanionAttack}
+                      className={`px-4 py-1 rounded-lg cinzel text-[9px] font-bold border transition-all ${isDark ? 'border-[#d4af37] text-[#d4af37] hover:bg-[#d4af37] hover:text-black' : 'border-[#8b4513] text-[#8b4513] hover:bg-[#8b4513] hover:text-white'}`}
+                    >
+                      + {t.add}
+                    </button>
+                 </div>
+                 <div className="flex flex-col gap-3">
+                    {(character.companion?.attacks || []).map((atk, idx) => (
+                      <div key={idx} className={`grid grid-cols-1 md:grid-cols-5 gap-3 p-4 rounded-xl border relative group ${isDark ? 'bg-white/5 border-white/10' : 'bg-white border-[#8b4513]/20'}`}>
+                         <div className="md:col-span-2">
+                            <label className="text-[8px] cinzel opacity-40 uppercase">{lang === 'pt' ? 'Ataque' : 'Attack'}</label>
+                            <input value={atk.name} onChange={e => {
+                               const next = [...(character.companion?.attacks || [])];
+                               next[idx].name = e.target.value;
+                               updateCompanion({ attacks: next });
+                            }} className="bg-transparent w-full fantasy-title text-lg outline-none" />
+                         </div>
+                         <div>
+                            <label className="text-[8px] cinzel opacity-40 uppercase">{t.companion_reach}</label>
+                            <input value={atk.reach} onChange={e => {
+                               const next = [...(character.companion?.attacks || [])];
+                               next[idx].reach = e.target.value;
+                               updateCompanion({ attacks: next });
+                            }} className="bg-transparent w-full cinzel text-xs font-bold outline-none" />
+                         </div>
+                         <div>
+                            <label className="text-[8px] cinzel opacity-40 uppercase">{t.companion_attack_bonus}</label>
+                            <input value={atk.bonus} onChange={e => {
+                               const next = [...(character.companion?.attacks || [])];
+                               next[idx].bonus = e.target.value;
+                               updateCompanion({ attacks: next });
+                            }} className="bg-transparent w-full text-center font-bold text-lg outline-none" />
+                         </div>
+                         <div>
+                            <label className="text-[8px] cinzel opacity-40 uppercase">{t.companion_damage}</label>
+                            <input value={atk.damage} onChange={e => {
+                               const next = [...(character.companion?.attacks || [])];
+                               next[idx].damage = e.target.value;
+                               updateCompanion({ attacks: next });
+                            }} className="bg-transparent w-full text-center font-bold text-lg outline-none" />
+                         </div>
+                         <button 
+                            onClick={() => updateCompanion({ attacks: (character.companion?.attacks || []).filter((_, i) => i !== idx) })}
+                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-900 text-white opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs shadow-lg"
+                         >
+                            ×
+                         </button>
+                      </div>
+                    ))}
+                 </div>
+                 <p className="text-[10px] italic opacity-40 text-center mt-4">
+                    “O companheiro não pode usar a ação Ataque Múltiplo, mesmo que conste em seu bloco original.”
+                 </p>
+              </div>
+
+              {/* SEÇÃO G: TRAÇOS */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
+                       <label className="cinzel text-[10px] font-bold uppercase opacity-60">{t.personality}</label>
+                       <textarea 
+                        value={character.companion?.personalityTrait || ""}
+                        onChange={e => updateCompanion({ personalityTrait: e.target.value })}
+                        rows={2}
+                        className={`p-3 rounded-xl border-2 parchment-text text-sm italic resize-none outline-none ${isDark ? 'bg-black/40 border-white/5 focus:border-[#d4af37]' : 'bg-white border-[#8b4513]/20 focus:border-[#8b4513]'}`}
+                       />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                       <label className="cinzel text-[10px] font-bold uppercase opacity-60">{t.flaws}</label>
+                       <textarea 
+                        value={character.companion?.flaw || ""}
+                        onChange={e => updateCompanion({ flaw: e.target.value })}
+                        rows={2}
+                        className={`p-3 rounded-xl border-2 parchment-text text-sm italic resize-none outline-none ${isDark ? 'bg-black/40 border-white/5 focus:border-[#d4af37]' : 'bg-white border-[#8b4513]/20 focus:border-[#8b4513]'}`}
+                       />
+                    </div>
+                 </div>
+                 <div className={`p-6 rounded-3xl border-2 flex flex-col gap-4 ${isDark ? 'bg-black/20 border-white/5' : 'bg-white border-[#8b4513]/10'}`}>
+                    <div className="flex justify-between border-b pb-2">
+                       <span className="cinzel text-[10px] font-bold uppercase opacity-40">{t.alignment}</span>
+                       <span className="parchment-text text-sm italic">{character.alignment} (Vínculo)</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-2">
+                       <span className="cinzel text-[10px] font-bold uppercase opacity-40">{t.ideals}</span>
+                       <span className="parchment-text text-sm italic">{character.ideals || "Proteção"}</span>
+                    </div>
+                    <div className="flex justify-between border-b pb-2">
+                       <span className="cinzel text-[10px] font-bold uppercase opacity-40">{t.bonds}</span>
+                       <span className="parchment-text text-sm italic">Ligado a você e ao seu grupo.</span>
+                    </div>
+                 </div>
+              </div>
+
+              {/* SEÇÃO H: MANUTENÇÃO */}
+              <div className={`mt-4 p-6 rounded-2xl border-2 border-dashed text-center ${isDark ? 'bg-white/5 border-white/10 opacity-60' : 'bg-black/5 border-black/10 opacity-60'}`}>
+                 <h4 className="cinzel text-[10px] font-bold uppercase mb-4 tracking-widest">{t.companion_maintenance}</h4>
+                 <div className="flex flex-wrap justify-center gap-6 text-[11px] italic">
+                    <p>“Para invocar o companheiro: 8 horas de trabalho e 50 po.”</p>
+                    <p>“Se o companheiro morrer: 8 horas e 25 po para restaurar o espírito.”</p>
+                 </div>
+              </div>
+
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 };

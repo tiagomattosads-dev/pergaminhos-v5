@@ -1,3 +1,4 @@
+
 export enum Attribute {
   FOR = 'FOR',
   DES = 'DES',
@@ -36,6 +37,7 @@ export interface OtherAttack {
   bonus: string;
   damage: string;
   range: string;
+  description?: string;
 }
 
 export interface Spell {
@@ -51,6 +53,30 @@ export interface ClassMetadata {
   spellAbility: Attribute | null;
   spellsModel: "prepared" | "known" | "none";
   hitDie: string;
+}
+
+export interface CompanionAttack {
+  name: string;
+  type: string;
+  reach: string;
+  bonus: string;
+  damage: string;
+}
+
+export interface Companion {
+  enabled: boolean;
+  name: string;
+  species: string;
+  stats: Record<Attribute, number>;
+  ac: number;
+  hp: { current: number; max: number };
+  hitDice: string;
+  speed: string;
+  initiative: number;
+  skillsProficient: string[];
+  attacks: CompanionAttack[];
+  personalityTrait: string;
+  flaw: string;
 }
 
 export interface Character {
@@ -101,4 +127,8 @@ export interface Character {
   language?: 'pt' | 'en';
   totemAnimal?: string | null;
   fightingStyles?: string[];
+  hunterChoices?: Record<number, string>;
+  favoredEnemies?: string[];
+  favoredTerrains?: string[];
+  companion?: Companion;
 }
