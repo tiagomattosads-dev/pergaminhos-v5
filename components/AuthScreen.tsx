@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { translations } from '../translations';
+import { supabase } from '../services/supabase';
 
 interface Props {
   onLogin: () => void;
@@ -12,6 +13,8 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
   const [isRegistering, setIsRegistering] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isDark = theme === 'dark';
@@ -26,10 +29,33 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
-      onLogin();
+    if (!email || !password) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (isRegistering) {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (signUpError) throw signUpError;
+        alert(language === 'pt' ? 'Verifique seu e-mail para confirmar o cadastro!' : 'Check your email to confirm registration!');
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (signInError) throw signInError;
+        onLogin();
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,6 +112,13 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
 
             {/* Formulário */}
             <form onSubmit={handleSubmit} className="w-full space-y-6 relative z-10">
+              {error && (
+                <div className={`p-3 rounded-lg text-xs cinzel font-bold text-center border ${
+                  isDark ? 'bg-red-900/20 border-red-500/50 text-red-400' : 'bg-red-50 border-red-200 text-red-700'
+                }`}>
+                  {error}
+                </div>
+              )}
               <div className="space-y-2">
                 <label className={`cinzel text-[10px] font-bold uppercase tracking-[0.2em] ml-1 opacity-70 ${
                   isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'
@@ -142,14 +175,17 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
 
               <button 
                 type="submit"
+                disabled={loading}
                 className={`w-full py-4 rounded-2xl cinzel text-sm font-bold shadow-xl transition-all border-b-4 active:translate-y-0.5 active:border-b-0 uppercase tracking-[0.3em] relative overflow-hidden group/btn ${
+                  loading ? 'opacity-70 cursor-not-allowed' : ''
+                } ${
                   isDark 
                     ? 'bg-gradient-to-b from-[#d4af37] to-[#b8860b] text-[#1a1a1a] border-[#8b4513] hover:brightness-105' 
                     : 'bg-gradient-to-b from-[#8b4513] to-[#3e2723] text-[#fdf5e6] border-[#1a0f00] hover:brightness-105'
                 }`}
               >
                 <span className="relative z-10 drop-shadow-md pointer-events-none">
-                  {isRegistering ? t.register_btn : t.seal_contract}
+                  {loading ? (language === 'pt' ? 'Processando...' : 'Processing...') : (isRegistering ? t.register_btn : t.seal_contract)}
                 </span>
               </button>
             </form>

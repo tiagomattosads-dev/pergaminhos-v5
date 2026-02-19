@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Character, Attribute } from './types';
 import { INITIAL_CHARACTER, createNewCharacter, getLevelFromXP, getProficiencyFromLevel, XP_TABLE, SUBCLASS_LEVELS, SUBCLASSES_PHB, CLASSES_PHB } from './constants';
 import { translations, classTranslations, subclassTranslations, raceTranslations } from './translations';
+import { supabase } from './services/supabase';
 import CharacterSheet from './components/CharacterSheet';
 import Inventory from './components/Inventory';
 import ClassFeatures from './components/ClassFeatures';
@@ -29,9 +30,8 @@ const App: React.FC = () => {
     return saved ? JSON.parse(saved) : [INITIAL_CHARACTER];
   });
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('dnd_session_active') === 'true';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [session, setSession] = useState<any>(null);
 
   const [selectedCharId, setSelectedCharId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>(Tab.Sheet);
@@ -71,6 +71,21 @@ const App: React.FC = () => {
 
   const t = translations[appLanguage];
   const isDark = theme === 'dark';
+
+  // Gerenciamento de Sessão Supabase
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsAuthenticated(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Helper para traduzir valores técnicos (Classe, Raça, etc)
   const translateValue = (val: string | null | undefined, dictionary: Record<string, { pt: string, en: string }>) => {
@@ -156,14 +171,13 @@ const App: React.FC = () => {
 
   const handleLogin = () => {
     setIsAuthenticated(true);
-    sessionStorage.setItem('dnd_session_active', 'true');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setIsAuthenticated(false);
     setSelectedCharId(null);
     setIsGlobalSettingsOpen(false);
-    sessionStorage.removeItem('dnd_session_active');
   };
 
   const updateCharacter = useCallback((updates: Partial<Character>) => {
