@@ -25,10 +25,9 @@ enum Tab {
 }
 
 const App: React.FC = () => {
-  const [allCharacters, setAllCharacters] = useState<Character[]>(() => {
-    const saved = localStorage.getItem('dnd_5e_characters_list');
-    return saved ? JSON.parse(saved) : [INITIAL_CHARACTER];
-  });
+  const [allCharacters, setAllCharacters] = useState<Character[]>([]);
+  const [isLoadingCharacters, setIsLoadingCharacters] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [session, setSession] = useState<any>(null);
@@ -87,6 +86,49 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Fetch characters from Supabase
+  useEffect(() => {
+    if (session?.user) {
+      setIsLoadingCharacters(true);
+      const fetchCharacters = async () => {
+        const { data, error } = await supabase
+          .from('characters')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          setErrorMessage(error.message);
+        } else {
+          const loadedChars = data.map((row: any) => ({
+            ...row.data,
+            id: row.id
+          }));
+          setAllCharacters(loadedChars);
+        }
+        setIsLoadingCharacters(false);
+      };
+      fetchCharacters();
+    } else {
+      setAllCharacters([]);
+    }
+  }, [session]);
+
+  // Auto-save current character to Supabase
+  useEffect(() => {
+    if (!character || !session?.user) return;
+
+    const timer = setTimeout(async () => {
+      const { error } = await supabase
+        .from('characters')
+        .update({ data: character })
+        .eq('id', character.id);
+      
+      if (error) setErrorMessage(error.message);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [character, session]);
+
   // Helper para traduzir valores técnicos (Classe, Raça, etc)
   const translateValue = (val: string | null | undefined, dictionary: Record<string, { pt: string, en: string }>) => {
     if (!val) return null;
@@ -137,9 +179,7 @@ const App: React.FC = () => {
     if (!isDead) setShowDeathOverlay(true);
   }, [isDead, selectedCharId]);
 
-  useEffect(() => {
-    localStorage.setItem('dnd_5e_characters_list', JSON.stringify(allCharacters));
-  }, [allCharacters]);
+  // LocalStorage removed for characters to use Supabase as source of truth
 
   useEffect(() => {
     localStorage.setItem('dnd_app_theme', theme);
@@ -209,24 +249,71 @@ const App: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleCreateNew = () => {
+  const handleCreateNew = async () => {
+    if (!session?.user) return;
+    
     const newChar = createNewCharacter();
+    newChar.id = crypto.randomUUID(); // Use UUID for Supabase compatibility
     newChar.language = appLanguage;
-    setAllCharacters(prev => [...prev, newChar]);
-    setSelectedCharId(newChar.id);
-    setIsGlobalSettingsOpen(false);
+
+    try {
+      const { error } = await supabase
+        .from('characters')
+        .insert([{ 
+          id: newChar.id,
+          user_id: session.user.id,
+          data: newChar 
+        }]);
+
+      if (error) throw error;
+
+      setAllCharacters(prev => [newChar, ...prev]);
+      setSelectedCharId(newChar.id);
+      setIsGlobalSettingsOpen(false);
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    }
   };
 
-  const handleImport = (importedChar: Character) => {
-    const charWithNewId = { ...importedChar, id: Date.now().toString() };
-    setAllCharacters(prev => [...prev, charWithNewId]);
+  const handleImport = async (importedChar: Character) => {
+    if (!session?.user) return;
+
+    const charWithNewId = { 
+      ...importedChar, 
+      id: crypto.randomUUID() 
+    };
+
+    try {
+      const { error } = await supabase
+        .from('characters')
+        .insert([{ 
+          id: charWithNewId.id,
+          user_id: session.user.id,
+          data: charWithNewId 
+        }]);
+
+      if (error) throw error;
+
+      setAllCharacters(prev => [charWithNewId, ...prev]);
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setAllCharacters(prev => {
-      return prev.filter(c => c.id !== id);
-    });
-    if (selectedCharId === id) setSelectedCharId(null);
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('characters')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setAllCharacters(prev => prev.filter(c => c.id !== id));
+      if (selectedCharId === id) setSelectedCharId(null);
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    }
   };
 
   const renderTab = () => {
@@ -355,6 +442,17 @@ const App: React.FC = () => {
   }
 
   if (!selectedCharId && !isGlobalSettingsOpen) {
+    if (isLoadingCharacters) {
+      return (
+        <div className="fixed inset-0 flex items-center justify-center bg-[#0d0700] text-[#d4af37]">
+          <div className="flex flex-col items-center gap-4">
+             <div className="w-12 h-12 border-4 border-[#d4af37] border-t-transparent rounded-full animate-spin"></div>
+             <p className="cinzel text-xl animate-pulse">Invocando Pergaminhos...</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <CharacterSelection 
         characters={allCharacters} 
@@ -729,6 +827,22 @@ const App: React.FC = () => {
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 1 1.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" /></svg>
           <span className="cinzel text-[10px] font-bold uppercase tracking-widest">{t.open_verdict}</span>
         </button>
+      )}
+
+      {/* Error Modal */}
+      {errorMessage && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-[#2d1b0d] border-2 border-red-500/50 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center">
+            <h3 className="text-red-500 cinzel font-bold text-xl mb-2">Erro Arcano</h3>
+            <p className="text-[#e8d5b5] mb-6">{errorMessage}</p>
+            <button 
+              onClick={() => setErrorMessage(null)}
+              className="bg-red-900/50 hover:bg-red-900 text-[#e8d5b5] px-6 py-2 rounded-lg cinzel font-bold border border-red-500/30 transition-all"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
