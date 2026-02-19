@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Character } from '../types';
 import { translations } from '../translations';
+import { supabase } from '../services/supabase';
 
 interface Props {
   character?: Character;
@@ -37,6 +38,13 @@ const Settings: React.FC<Props> = ({
 }) => {
   const isDark = theme === 'dark';
   const t = translations[appLanguage];
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data.user?.email || null);
+    });
+  }, []);
   
   const handleExport = () => {
     if (!character) return;
@@ -111,6 +119,11 @@ const Settings: React.FC<Props> = ({
         <p className={`cinzel text-[9px] uppercase tracking-[0.3em] opacity-40 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>
           O Pergaminho v1.5.0
         </p>
+        {userEmail && (
+          <p className={`cinzel text-[10px] font-bold mt-2 opacity-60 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>
+            Logado como: {userEmail}
+          </p>
+        )}
       </div>
 
       {/* SESSÃO: HERÓI */}

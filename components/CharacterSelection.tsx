@@ -24,6 +24,7 @@ const CharacterSelection: React.FC<Props> = ({
   language = 'pt' 
 }) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const importInputRef = useRef<HTMLInputElement>(null);
   const t = translations[language];
 
@@ -76,6 +77,25 @@ const CharacterSelection: React.FC<Props> = ({
       processFile(file);
     }
     e.target.value = ''; 
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
   };
 
   return (
@@ -205,14 +225,29 @@ const CharacterSelection: React.FC<Props> = ({
           {/* Botão Importar */}
           <button 
             onClick={() => importInputRef.current?.click()}
-            className="group relative h-80 border-2 bg-[#1a0f00]/40 border-dashed border-[#8b4513]/40 rounded-3xl flex flex-col items-center justify-center transition-all duration-500 hover:border-[#d4af37] hover:bg-[#1a0f00] shadow-xl overflow-hidden"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`group relative h-80 border-2 bg-[#1a0f00]/40 border-dashed rounded-3xl flex flex-col items-center justify-center transition-all duration-500 shadow-xl overflow-hidden ${
+              isDragging 
+                ? 'border-[#d4af37] bg-[#2d1b0d] scale-105 shadow-[0_0_40px_rgba(212,175,55,0.3)]' 
+                : 'border-[#8b4513]/40 hover:border-[#d4af37] hover:bg-[#1a0f00]'
+            }`}
           >
-            <div className="w-14 h-14 rounded-2xl border-2 border-[#8b4513]/40 text-[#8b4513] group-hover:border-[#d4af37] group-hover:text-[#d4af37] flex items-center justify-center mb-4 transition-all duration-500 bg-black/20">
+            <div className={`w-14 h-14 rounded-2xl border-2 flex items-center justify-center mb-4 transition-all duration-500 bg-black/20 ${
+              isDragging
+                ? 'border-[#d4af37] text-[#d4af37] scale-110'
+                : 'border-[#8b4513]/40 text-[#8b4513] group-hover:border-[#d4af37] group-hover:text-[#d4af37]'
+            }`}>
               <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
             </div>
-            <span className="cinzel font-bold tracking-[0.2em] text-[10px] text-[#8b4513] group-hover:text-[#d4af37] uppercase">{t.import_record}</span>
+            <span className={`cinzel font-bold tracking-[0.2em] text-[10px] uppercase transition-colors ${
+              isDragging ? 'text-[#d4af37]' : 'text-[#8b4513] group-hover:text-[#d4af37]'
+            }`}>
+              {isDragging ? (language === 'pt' ? 'Solte o Pergaminho' : 'Drop the Scroll') : t.import_record}
+            </span>
             <p className="mt-4 px-8 text-center parchment-text text-[11px] opacity-40 leading-tight">Carregue lendas salvas em outros dispositivos.</p>
           </button>
         </div>
