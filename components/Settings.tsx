@@ -114,7 +114,7 @@ const Settings: React.FC<Props> = ({
       </div>
 
       {/* SESSÃO: HERÓI */}
-      <SettingsSection title={appLanguage === 'pt' ? "Conta & Herói" : "Account & Hero"}>
+      <SettingsSection title={appLanguage === 'pt' ? "Conta & Aventureiro" : "Account & Adventurer"}>
         <SettingsItem 
           icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>}
           title={t.change_hero}
@@ -233,7 +233,7 @@ const Settings: React.FC<Props> = ({
       {/* Roda-pé sutil */}
       <div className="text-center opacity-20 py-4">
         <svg className={`w-8 h-8 mx-auto mb-2 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/></svg>
-        <p className="cinzel text-[8px] uppercase tracking-[0.5em]">De heróis para heróis</p>
+        <p className="cinzel text-[8px] uppercase tracking-[0.5em]">De aventureiros para aventureiros</p>
       </div>
 
     </div>
