@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Character, Attribute } from './types';
 import { INITIAL_CHARACTER, createNewCharacter, getLevelFromXP, getProficiencyFromLevel, XP_TABLE, SUBCLASS_LEVELS, SUBCLASSES_PHB, CLASSES_PHB } from './constants';
@@ -45,7 +46,7 @@ const App: React.FC = () => {
 
   const [showClassFeaturesTab, setShowClassFeaturesTab] = useState<boolean>(() => {
     const saved = localStorage.getItem('dnd_app_show_features_tab');
-    return saved !== null ? saved === 'true' : true;
+    return saved !== null ? saved === 'true' : false;
   });
 
   const [abbreviateAttributes, setAbbreviateAttributes] = useState<boolean>(() => {
@@ -247,7 +248,7 @@ const App: React.FC = () => {
     if (!character) return null;
     switch (activeTab) {
       case Tab.Sheet: 
-        return <CharacterSheet character={character} updateCharacter={updateCharacter} onImageUpload={handleImageUpload} theme={theme} abbreviateAttributes={abbreviateAttributes} />;
+        return <CharacterSheet character={character} updateCharacter={updateCharacter} onImageUpload={handleImageUpload} theme={theme} abbreviateAttributes={abbreviateAttributes} showClassFeaturesTab={showClassFeaturesTab} />;
       case Tab.Inventory: 
         return <Inventory character={character} updateCharacter={updateCharacter} theme={theme} />;
       case Tab.ClassFeatures:
@@ -535,6 +536,7 @@ const App: React.FC = () => {
             </div>
           </nav>
 
+          {/* CONTEÚDO PRINCIPAL */}
           <main className="relative z-10">
             <div className="max-w-7xl mx-auto p-2 lg:p-8">
                <div className={`transition-all duration-500 rounded-xl shadow-2xl border ${theme === 'dark' ? 'bg-[#121212] border-[#2a2a2a]' : 'bg-[#fdf5e6]/95 border-[#8b4513]/20'}`}>

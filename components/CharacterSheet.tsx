@@ -10,6 +10,7 @@ interface Props {
   onImageUpload: (file: File) => void;
   theme?: 'light' | 'dark';
   abbreviateAttributes?: boolean;
+  showClassFeaturesTab?: boolean;
 }
 
 const DEFAULT_COMPANION: Companion = {
@@ -31,7 +32,7 @@ const DEFAULT_COMPANION: Companion = {
   flaw: ""
 };
 
-const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUpload, theme = 'light', abbreviateAttributes = false }) => {
+const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUpload, theme = 'light', abbreviateAttributes = false, showClassFeaturesTab = false }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [combatTab, setCombatTab] = useState<'weapons' | 'attacks'>('weapons');
@@ -196,41 +197,53 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
       }`}>
         <div className="flex flex-col relative" ref={dropdownRef}>
           <label className={`cinzel text-[10px] font-bold uppercase tracking-widest mb-1 opacity-80 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{t.class}</label>
-          <button 
-            onClick={() => setIsClassDropdownOpen(!isClassDropdownOpen)}
-            className={`flex items-center justify-between w-full bg-transparent border-b outline-none fantasy-title text-base sm:text-lg px-1 transition-colors h-[28px] sm:h-[32px] text-left group ${
-              isDark ? 'border-white/10 focus:border-[#d4af37] text-[#e8d5b5]' : 'border-[#8b4513]/20 focus:border-[#8b4513] text-[#3e2723]'
-            }`}
-          >
-            <span className="truncate">{translateValue(character.class, classTranslations)}</span>
-            <svg 
-              className={`w-3 h-3 transition-transform duration-300 opacity-40 group-hover:opacity-100 ${isClassDropdownOpen ? 'rotate-180' : ''}`} 
-              fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+          {showClassFeaturesTab ? (
+            <>
+              <button 
+                onClick={() => setIsClassDropdownOpen(!isClassDropdownOpen)}
+                className={`flex items-center justify-between w-full bg-transparent border-b outline-none fantasy-title text-base sm:text-lg px-1 transition-colors h-[28px] sm:h-[32px] text-left group ${
+                  isDark ? 'border-white/10 focus:border-[#d4af37] text-[#e8d5b5]' : 'border-[#8b4513]/20 focus:border-[#8b4513] text-[#3e2723]'
+                }`}
+              >
+                <span className="truncate">{translateValue(character.class, classTranslations)}</span>
+                <svg 
+                  className={`w-3 h-3 transition-transform duration-300 opacity-40 group-hover:opacity-100 ${isClassDropdownOpen ? 'rotate-180' : ''}`} 
+                  fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-          {isClassDropdownOpen && (
-            <div className={`absolute top-full left-0 right-0 mt-2 z-[200] border-2 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 ${
-              isDark ? 'bg-[#1a1a1a] border-[#333]' : 'bg-[#fdf5e6] border-[#8b4513]'
-            }`}>
-              <div className="max-h-60 overflow-y-auto custom-scrollbar">
-                {Object.keys(CLASSES_PHB).map(cls => (
-                  <button
-                    key={cls}
-                    onClick={() => handleClassChange(cls)}
-                    className={`w-full text-left px-4 py-3 fantasy-title text-base sm:text-lg transition-all border-b last:border-b-0 ${
-                      character.class === cls 
-                        ? (isDark ? 'bg-[#d4af37] text-black' : 'bg-[#8b4513] text-[#fdf5e6]')
-                        : (isDark ? 'text-[#e8d5b5] border-white/5 hover:bg-white/5' : 'text-[#3e2723] border-[#8b4513]/10 hover:bg-[#8b4513]/5')
-                    }`}
-                  >
-                    {translateValue(cls, classTranslations)}
-                  </button>
-                ))}
-              </div>
-            </div>
+              {isClassDropdownOpen && (
+                <div className={`absolute top-full left-0 right-0 mt-2 z-[200] border-2 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 ${
+                  isDark ? 'bg-[#1a1a1a] border-[#333]' : 'bg-[#fdf5e6] border-[#8b4513]'
+                }`}>
+                  <div className="max-h-60 overflow-y-auto custom-scrollbar">
+                    {Object.keys(CLASSES_PHB).map(cls => (
+                      <button
+                        key={cls}
+                        onClick={() => handleClassChange(cls)}
+                        className={`w-full text-left px-4 py-3 fantasy-title text-base sm:text-lg transition-all border-b last:border-b-0 ${
+                          character.class === cls 
+                            ? (isDark ? 'bg-[#d4af37] text-black' : 'bg-[#8b4513] text-[#fdf5e6]')
+                            : (isDark ? 'text-[#e8d5b5] border-white/5 hover:bg-white/5' : 'text-[#3e2723] border-[#8b4513]/10 hover:bg-[#8b4513]/5')
+                        }`}
+                      >
+                        {translateValue(cls, classTranslations)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <input 
+              value={character.class}
+              onChange={(e) => updateCharacter({ class: e.target.value })}
+              className={`bg-transparent border-b outline-none fantasy-title text-base sm:text-lg px-1 transition-colors h-[28px] sm:h-[32px] ${
+                isDark ? 'border-white/10 focus:border-[#d4af37] text-[#e8d5b5]' : 'border-[#8b4513]/20 focus:border-[#8b4513] text-[#3e2723]'
+              }`}
+            />
           )}
         </div>
 
