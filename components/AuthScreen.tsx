@@ -11,11 +11,14 @@ interface Props {
 
 const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<{ title: string, message: string } | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isDark = theme === 'dark';
   const t = translations[language];
@@ -31,19 +34,35 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    if (!email) return;
+    if (!isResettingPassword && !password) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      if (isRegistering) {
+      if (isResettingPassword) {
+        const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin,
+        });
+        if (resetError) throw resetError;
+        setSuccessMessage({
+          title: language === 'pt' ? 'Coruja Enviada!' : 'Owl Sent!',
+          message: language === 'pt' ? 'Verifique seu e-mail para redefinir sua senha.' : 'Check your email to reset your password.'
+        });
+        setShowSuccessModal(true);
+        setIsResettingPassword(false);
+      } else if (isRegistering) {
         const { error: signUpError } = await supabase.auth.signUp({
           email,
           password,
         });
         if (signUpError) throw signUpError;
-        alert(language === 'pt' ? 'Verifique seu e-mail para confirmar o cadastro!' : 'Check your email to confirm registration!');
+        setSuccessMessage({
+          title: language === 'pt' ? 'Pergaminho Enviado!' : 'Scroll Sent!',
+          message: language === 'pt' ? 'Verifique seu e-mail para confirmar o cadastro e selar seu destino.' : 'Check your email to confirm registration and seal your fate.'
+        });
+        setShowSuccessModal(true);
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -105,7 +124,9 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
               <h1 className={`fantasy-title text-2xl sm:text-4xl text-center leading-tight uppercase tracking-normal drop-shadow-sm ${
                 isDark ? 'text-[#d4af37]' : 'text-[#3e2723]'
               }`}>
-                {isRegistering ? t.auth_title_register : t.auth_title_login}
+                {isResettingPassword 
+                  ? (language === 'pt' ? 'Recuperar Acesso' : 'Recover Access')
+                  : (isRegistering ? t.auth_title_register : t.auth_title_login)}
               </h1>
               <div className={`h-0.5 w-24 mt-2 rounded-full opacity-20 ${isDark ? 'bg-[#d4af37]' : 'bg-[#8b4513]'}`}></div>
             </div>
@@ -146,32 +167,51 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className={`cinzel text-[10px] font-bold uppercase tracking-[0.2em] ml-1 opacity-70 ${
-                  isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'
-                }`}>
-                  {t.password}
-                </label>
-                <div className="relative">
-                  <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-300 z-10 ${focusedField === 'password' ? 'text-[#d4af37]' : 'text-gray-400 opacity-40'}`}>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+              {!isResettingPassword && (
+                <div className="space-y-2">
+                  <label className={`cinzel text-[10px] font-bold uppercase tracking-[0.2em] ml-1 opacity-70 ${
+                    isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'
+                  }`}>
+                    {t.password}
+                  </label>
+                  <div className="relative">
+                    <div className={`absolute left-4 top-1/2 -translate-y-1/2 transition-all duration-300 z-10 ${focusedField === 'password' ? 'text-[#d4af37]' : 'text-gray-400 opacity-40'}`}>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                    </div>
+                    <input 
+                      type="password"
+                      required
+                      onFocus={() => setFocusedField('password')}
+                      onBlur={() => setFocusedField(null)}
+                      placeholder="••••••••"
+                      className={`w-full p-4 pl-12 rounded-xl parchment-text text-lg outline-none border-2 transition-all shadow-inner ${
+                        isDark 
+                          ? 'bg-black/40 border-white/5 text-[#f4e4bc] focus:border-[#d4af37] placeholder:text-white/10' 
+                          : 'bg-white/80 border-[#8b4513]/20 text-[#3e2723] focus:border-[#8b4513] placeholder:text-[#8b4513]/20'
+                      }`}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
                   </div>
-                  <input 
-                    type="password"
-                    required
-                    onFocus={() => setFocusedField('password')}
-                    onBlur={() => setFocusedField(null)}
-                    placeholder="••••••••"
-                    className={`w-full p-4 pl-12 rounded-xl parchment-text text-lg outline-none border-2 transition-all shadow-inner ${
-                      isDark 
-                        ? 'bg-black/40 border-white/5 text-[#f4e4bc] focus:border-[#d4af37] placeholder:text-white/10' 
-                        : 'bg-white/80 border-[#8b4513]/20 text-[#3e2723] focus:border-[#8b4513] placeholder:text-[#8b4513]/20'
-                    }`}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                  
+                  {!isRegistering && (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsResettingPassword(true);
+                          setError(null);
+                        }}
+                        className={`text-[10px] cinzel font-bold uppercase tracking-wider hover:underline ${
+                          isDark ? 'text-[#d4af37]/70 hover:text-[#d4af37]' : 'text-[#8b4513]/70 hover:text-[#8b4513]'
+                        }`}
+                      >
+                        {language === 'pt' ? 'Esqueci minha senha' : 'Forgot password'}
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
 
               <button 
                 type="submit"
@@ -185,7 +225,13 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
                 }`}
               >
                 <span className="relative z-10 drop-shadow-md pointer-events-none">
-                  {loading ? (language === 'pt' ? 'Processando...' : 'Processing...') : (isRegistering ? t.register_btn : t.seal_contract)}
+                  {loading 
+                    ? (language === 'pt' ? 'Processando...' : 'Processing...') 
+                    : (isResettingPassword 
+                        ? (language === 'pt' ? 'Recuperar Senha' : 'Recover Password')
+                        : (isRegistering ? t.register_btn : t.seal_contract)
+                      )
+                  }
                 </span>
               </button>
             </form>
@@ -193,14 +239,23 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
             <div className="mt-10 pt-6 border-t w-full border-black/10 text-center">
               <button 
                 onClick={() => {
-                  setIsRegistering(!isRegistering);
-                  setFocusedField(null);
+                  if (isResettingPassword) {
+                    setIsResettingPassword(false);
+                    setError(null);
+                  } else {
+                    setIsRegistering(!isRegistering);
+                    setFocusedField(null);
+                    setError(null);
+                  }
                 }}
                 className={`cinzel text-[10px] font-bold uppercase tracking-[0.15em] opacity-40 hover:opacity-100 transition-all underline decoration-dotted underline-offset-4 decoration-1 ${
                   isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'
                 }`}
               >
-                {isRegistering ? t.has_record : t.start_journey}
+                {isResettingPassword 
+                  ? (language === 'pt' ? 'Voltar ao Login' : 'Back to Login')
+                  : (isRegistering ? t.has_record : t.start_journey)
+                }
               </button>
             </div>
           </div>
@@ -216,6 +271,44 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
       
       {/* Brilho Sutil */}
       <div className="fixed inset-0 pointer-events-none z-[5] bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.05)_0%,transparent_60%)]"></div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className={`border-2 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center relative overflow-hidden ${
+            isDark ? 'bg-[#2d1b0d] border-[#d4af37]/50' : 'bg-[#fdf5e6] border-[#8b4513]/50'
+          }`}>
+            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/old-map.png')] pointer-events-none"></div>
+            
+            <div className="relative z-10">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-900/20 flex items-center justify-center border-2 border-green-500/30">
+                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              
+              <h3 className={`cinzel font-bold text-xl mb-2 ${isDark ? 'text-[#d4af37]' : 'text-[#3e2723]'}`}>
+                {successMessage?.title || (language === 'pt' ? 'Pergaminho Enviado!' : 'Scroll Sent!')}
+              </h3>
+              
+              <p className={`mb-6 text-sm ${isDark ? 'text-[#e8d5b5]' : 'text-[#5d4037]'}`}>
+                {successMessage?.message || (language === 'pt' ? 'Verifique seu e-mail para confirmar o cadastro e selar seu destino.' : 'Check your email to confirm registration and seal your fate.')}
+              </p>
+              
+              <button 
+                onClick={() => setShowSuccessModal(false)}
+                className={`px-6 py-2 rounded-lg cinzel font-bold border transition-all ${
+                  isDark 
+                    ? 'bg-[#d4af37]/10 hover:bg-[#d4af37]/20 text-[#d4af37] border-[#d4af37]/30' 
+                    : 'bg-[#8b4513]/10 hover:bg-[#8b4513]/20 text-[#8b4513] border-[#8b4513]/30'
+                }`}
+              >
+                {language === 'pt' ? 'Entendido' : 'Understood'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

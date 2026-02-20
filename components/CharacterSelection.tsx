@@ -25,6 +25,7 @@ const CharacterSelection: React.FC<Props> = ({
 }) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [alertMessage, setAlertMessage] = useState<{ title: string; message: string; type: 'error' | 'info' } | null>(null);
   const importInputRef = useRef<HTMLInputElement>(null);
   const t = translations[language];
 
@@ -51,7 +52,11 @@ const CharacterSelection: React.FC<Props> = ({
 
   const processFile = (file: File) => {
     if (!file.name.endsWith('.json')) {
-      alert(language === 'pt' ? "Apenas pergaminhos sagrados (.json) são aceitos na biblioteca." : "Only sacred scrolls (.json) are accepted in the library.");
+      setAlertMessage({
+        title: language === 'pt' ? "Pergaminho Inválido" : "Invalid Scroll",
+        message: language === 'pt' ? "Apenas pergaminhos sagrados (.json) são aceitos na biblioteca." : "Only sacred scrolls (.json) are accepted in the library.",
+        type: 'error'
+      });
       return;
     }
 
@@ -62,10 +67,18 @@ const CharacterSelection: React.FC<Props> = ({
         if (char && char.name) {
           onImport(char);
         } else {
-          alert(language === 'pt' ? "Arquivo inválido. Formato de pergaminho não reconhecido." : "Invalid file. Scroll format not recognized.");
+          setAlertMessage({
+            title: language === 'pt' ? "Conteúdo Ilegível" : "Unreadable Content",
+            message: language === 'pt' ? "Arquivo inválido. Formato de pergaminho não reconhecido." : "Invalid file. Scroll format not recognized.",
+            type: 'error'
+          });
         }
       } catch (err) {
-        alert(language === 'pt' ? "Erro ao ler arquivo. Certifique-se de que é um JSON válido." : "Error reading file. Ensure it is a valid JSON.");
+        setAlertMessage({
+          title: language === 'pt' ? "Erro Arcano" : "Arcane Error",
+          message: language === 'pt' ? "Erro ao ler arquivo. Certifique-se de que é um JSON válido." : "Error reading file. Ensure it is a valid JSON.",
+          type: 'error'
+        });
       }
     };
     reader.readAsText(file);
@@ -285,6 +298,48 @@ const CharacterSelection: React.FC<Props> = ({
                 className="w-full bg-transparent text-[#8b4513] cinzel font-bold py-3 rounded-2xl uppercase tracking-[0.2em] text-[10px] hover:bg-black/5 transition-all"
               >
                 {t.preserve}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Alert Modal */}
+      {alertMessage && (
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-[#2d1b0d] border-2 border-[#d4af37]/50 rounded-2xl p-6 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
+            <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/old-map.png')] pointer-events-none"></div>
+            
+            <div className="relative z-10">
+              <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center border-2 ${
+                alertMessage.type === 'error' 
+                  ? 'bg-red-900/20 border-red-500/30' 
+                  : 'bg-[#d4af37]/10 border-[#d4af37]/30'
+              }`}>
+                {alertMessage.type === 'error' ? (
+                  <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                ) : (
+                  <svg className="w-8 h-8 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </div>
+              
+              <h3 className="cinzel font-bold text-xl mb-2 text-[#d4af37] uppercase tracking-wider">
+                {alertMessage.title}
+              </h3>
+              
+              <p className="mb-6 text-sm text-[#e8d5b5] parchment-text italic">
+                {alertMessage.message}
+              </p>
+              
+              <button 
+                onClick={() => setAlertMessage(null)}
+                className="px-8 py-3 rounded-lg cinzel font-bold border transition-all bg-[#d4af37]/10 hover:bg-[#d4af37]/20 text-[#d4af37] border-[#d4af37]/30 uppercase tracking-widest text-xs"
+              >
+                {language === 'pt' ? 'Entendido' : 'Understood'}
               </button>
             </div>
           </div>

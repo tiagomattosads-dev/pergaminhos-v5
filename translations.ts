@@ -8,7 +8,7 @@ export const translations = {
     settings: "Configurações",
     character_sheet_tab: "FICHA TÉCNICA",
     inventory_tab: "INVENTÁRIO",
-    class_features_tab: "HABILIDADES DE CLASSE",
+    class_features_tab: "CARACTERÍSTICAS DE CLASSE",
     magic_tab: "TRUQUES E MAGIAS",
     history_tab: "HISTÓRIA",
     class: "Classe",
@@ -69,7 +69,7 @@ export const translations = {
     ideals: "Ideais",
     bonds: "Vínculos",
     flaws: "Defeitos",
-    history_of: "History de",
+    history_of: "História de",
     write_legend: "Escreva sua lenda aqui...",
     master_notes: "Notas do Mestre / Tesouros Adicionais",
     extra_notes: "Anotações extras...",
@@ -139,8 +139,9 @@ export const translations = {
     sealed_knowledge: "CONHECIMENTO SELADO",
     features_revealed_at: "As habilidades de especialização serão reveladas no nível {level}.",
     cancel: "Cancelar",
-    show_features_tab: "Exibir Habilidades de Classe",
+    show_features_tab: "Exibir Características de Classe",
     features_tab_desc: "Ativar aba de habilidades na navegação",
+    in_development: "Em desenvolvimento",
     manage: "gerenciar",
     abbreviate_attributes: "Abreviar Atributos",
     abbreviate_attributes_desc: "Usar siglas (ex: FOR, DES) na ficha",
@@ -164,7 +165,10 @@ export const translations = {
     companion_reach: "Alcance",
     companion_attack_bonus: "Bônus Atk",
     companion_damage: "Dano",
-    add_companion_attack: "Adicionar Ataque Animal"
+    add_companion_attack: "Adicionar Ataque Animal",
+    passive_perception: "Percepção Passiva",
+    languages: "Idiomas",
+    languages_placeholder: "Comum, Élfico, Anão..."
   },
   en: {
     sheet: "Sheet",
@@ -307,6 +311,7 @@ export const translations = {
     cancel: "Cancel",
     show_features_tab: "Show Class Features",
     features_tab_desc: "Enable features tab in navigation",
+    in_development: "In development",
     manage: "manage",
     abbreviate_attributes: "Abbreviate Attributes",
     abbreviate_attributes_desc: "Use siglas (eg: STR, DEX) on the sheet",
@@ -330,7 +335,10 @@ export const translations = {
     companion_reach: "Reach",
     companion_attack_bonus: "Atk Bonus",
     companion_damage: "Damage",
-    add_companion_attack: "Add Animal Attack"
+    add_companion_attack: "Add Animal Attack",
+    passive_perception: "Passive Perception",
+    languages: "Languages",
+    languages_placeholder: "Common, Elvish, Dwarvish..."
   }
 };
 

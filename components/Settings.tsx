@@ -189,8 +189,14 @@ const Settings: React.FC<Props> = ({
           title={t.show_features_tab}
           description={t.features_tab_desc}
           action={
-            <div className={`w-12 h-6 rounded-full relative transition-colors cursor-pointer ${showClassFeaturesTab ? 'bg-[#d4af37]' : 'bg-gray-300'}`} onClick={() => setShowClassFeaturesTab(!showClassFeaturesTab)}>
-              <div className={`absolute top-1 w-4 h-4 rounded-full transition-all shadow-md bg-white ${showClassFeaturesTab ? 'left-7' : 'left-1'}`}></div>
+            <div className="relative group/tooltip">
+              <div className={`w-12 h-6 rounded-full relative transition-colors cursor-not-allowed opacity-50 ${showClassFeaturesTab ? 'bg-[#d4af37]' : 'bg-gray-300'}`}>
+                <div className={`absolute top-1 w-4 h-4 rounded-full transition-all shadow-md bg-white ${showClassFeaturesTab ? 'left-7' : 'left-1'}`}></div>
+              </div>
+              <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap pointer-events-none ${isDark ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                {t.in_development}
+                <div className={`absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent ${isDark ? 'border-t-white' : 'border-t-black'}`}></div>
+              </div>
             </div>
           }
         />

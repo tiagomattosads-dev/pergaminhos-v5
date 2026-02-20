@@ -92,8 +92,7 @@ const Subscription: React.FC<Props> = ({ theme, onBack }) => {
           features={[
             "Até 3 pergaminhos de personagem",
             "Cálculos de regras básicas 5e",
-            "Grimório e Inventário padrão",
-            "Exportação manual de JSON"
+            "Grimório e Inventário padrão"
           ]}
           sealColor="bg-gray-500"
           buttonText="Plano Atual"
@@ -105,7 +104,8 @@ const Subscription: React.FC<Props> = ({ theme, onBack }) => {
           highlight={true}
           features={[
             "Tudo do plano Andarilho.",
-            "Pergaminhos ilimitados"
+            "Pergaminhos ilimitados",
+            "Importação e exportação de ficha"
           ]}
           sealColor="bg-orange-800"
           buttonText="Consagrar Pergaminhos"

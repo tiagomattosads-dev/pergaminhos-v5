@@ -40,6 +40,7 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
   const [isClassDropdownOpen, setIsClassDropdownOpen] = useState(false);
   const [portraitError, setPortraitError] = useState(false);
   const [isCompanionExpanded, setIsCompanionExpanded] = useState(true);
+  const [languagesInput, setLanguagesInput] = useState(character.proficiencies.languages.join(', '));
   
   const lang = character.language || 'pt';
   const t = translations[lang];
@@ -58,6 +59,10 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
   }, [character.id, character.portrait]);
 
   useEffect(() => {
+    setLanguagesInput(character.proficiencies.languages.join(', '));
+  }, [character.proficiencies.languages]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsClassDropdownOpen(false);
@@ -71,6 +76,12 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
     const currentLevel = getLevelFromXP(character.exp);
     return getProficiencyFromLevel(currentLevel);
   }, [character.exp]);
+
+  const passivePerception = useMemo(() => {
+    const wisMod = getModifier(character.stats[Attribute.SAB]);
+    const isProficient = character.proficiencies.skills.includes('Percepção');
+    return 10 + wisMod + (isProficient ? profBonus : 0);
+  }, [character.stats, character.proficiencies.skills, profBonus]);
 
   const StatBoxMedallion: React.FC<{ attr: Attribute, score: number }> = ({ attr, score }) => {
     const mod = getModifier(score);
@@ -285,6 +296,10 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                   <span className={`text-[8px] cinzel font-bold uppercase tracking-wider ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{t.prof_bonus}</span>
                   <span className={`text-lg font-bold fantasy-title ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}>+{profBonus}</span>
                 </div>
+                <div className={`flex flex-col items-center backdrop-blur-sm border p-1.5 rounded-lg w-20 shadow-sm ${isDark ? 'bg-black/40 border-white/10' : 'bg-white/70 border-[#8b4513]/20'}`}>
+                  <span className={`text-[6px] cinzel font-bold uppercase tracking-wider text-center leading-tight ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{t.passive_perception}</span>
+                  <span className={`text-lg font-bold fantasy-title ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}>{passivePerception}</span>
+                </div>
                 <div className={`flex flex-col items-center backdrop-blur-sm border p-1.5 rounded-lg w-16 shadow-sm ${isDark ? 'bg-black/40 border-white/10' : 'bg-white/70 border-[#8b4513]/20'}`}>
                   <span className={`text-[8px] cinzel font-bold uppercase tracking-wider ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{t.inspiration}</span>
                   <input 
@@ -476,6 +491,20 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                 );
               })}
             </div>
+          </div>
+
+          <div className={`border-2 p-5 rounded-xl shadow-xl ${isDark ? 'bg-[#1a1a1a] border-white/5' : 'bg-[#fdf5e6] border-[#8b4513]'}`}>
+            <h2 className={`cinzel text-sm font-bold border-b mb-4 pb-2 tracking-[0.2em] uppercase text-center ${isDark ? 'text-[#d4af37] border-white/10' : 'text-[#8b4513] border-[#8b4513]/30'}`}>{t.languages}</h2>
+            <textarea
+              value={languagesInput}
+              onChange={(e) => setLanguagesInput(e.target.value)}
+              onBlur={() => {
+                const langs = languagesInput.split(',').map(s => s.trim()).filter(s => s);
+                updateCharacter({ proficiencies: { ...character.proficiencies, languages: langs } });
+              }}
+              placeholder={t.languages_placeholder}
+              className={`w-full bg-transparent font-sans text-sm focus:outline-none resize-none min-h-[4rem] ${isDark ? 'text-[#e8d5b5] placeholder:text-white/20' : 'text-[#3e2723] placeholder:text-black/20'}`}
+            />
           </div>
 
           <div className={`border-2 p-5 rounded-xl shadow-xl ${isDark ? 'bg-[#1a1a1a] border-white/5' : 'bg-[#fdf5e6] border-[#8b4513]'}`}>

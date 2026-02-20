@@ -137,7 +137,7 @@ const App: React.FC = () => {
 
   // Regra de disparo da Subclasse (Auto-disparo uma única vez por personagem/nível atingido)
   useEffect(() => {
-    if (character && character.class) {
+    if (character && character.class && showClassFeaturesTab) {
       const choiceLevel = SUBCLASS_LEVELS[character.class] || 3;
       const autoKey = `${character.id}_${character.level}`;
       
@@ -146,7 +146,7 @@ const App: React.FC = () => {
         setHasAutomaticallyShownSubclassModal(prev => ({ ...prev, [autoKey]: true }));
       }
     }
-  }, [character?.level, character?.class, character?.subclass, character?.id, hasAutomaticallyShownSubclassModal]);
+  }, [character?.level, character?.class, character?.subclass, character?.id, hasAutomaticallyShownSubclassModal, showClassFeaturesTab]);
 
   // Sincronizar o idioma do personagem selecionado com o idioma global do app
   useEffect(() => {
@@ -695,7 +695,7 @@ const App: React.FC = () => {
       </div>
 
       {/* MODAL DE ESCOLHA DE SUBCLASSE */}
-      {showSubclassModal && character && character.class && (
+      {showSubclassModal && character && character.class && showClassFeaturesTab && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
            <div className={`relative max-w-2xl w-full border-4 rounded-[2.5rem] shadow-[0_30px_80px_rgba(0,0,0,1)] overflow-hidden flex flex-col ${isDark ? 'bg-[#1a1a1a] border-[#333]' : 'bg-[#fdf5e6] border-[#8b4513]'}`}>
               <div className={`absolute inset-0 opacity-5 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/old-map.png')]`}></div>
