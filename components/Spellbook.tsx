@@ -8,9 +8,10 @@ interface Props {
   character: Character;
   updateCharacter: (updates: Partial<Character>) => void;
   theme?: 'light' | 'dark';
+  showClassFeaturesTab?: boolean;
 }
 
-const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light' }) => {
+const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light', showClassFeaturesTab = true }) => {
   const [newSpell, setNewSpell] = useState({ name: '', level: 0, description: '' });
   const isDark = theme === 'dark';
   const lang = character.language || 'pt';
@@ -27,7 +28,8 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
     const isArcaneKnight = character.class === "Guerreiro" && character.subclass === "Cavaleiro Arcano";
     const isArcaneTrickster = character.class === "Ladino" && character.subclass === "Trapaceiro Arcano";
     
-    const enabled = isBaseCaster || isArcaneKnight || isArcaneTrickster;
+    // Se as características de classe estiverem desativadas, o usuário tem controle total
+    const enabled = !showClassFeaturesTab || isBaseCaster || isArcaneKnight || isArcaneTrickster;
     
     let ability = character.spellcastingAbility;
     if (!ability) {
@@ -37,7 +39,7 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
     }
 
     return { enabled, ability };
-  }, [character.class, character.subclass, character.classMetadata, character.spellcastingAbility]);
+  }, [character.class, character.subclass, character.classMetadata, character.spellcastingAbility, showClassFeaturesTab]);
 
   // Cálculos de Atributos e Bônus
   const abilityMod = Math.floor((character.stats[spellcastingConfig.ability] - 10) / 2);
@@ -171,9 +173,6 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
       <div className={!spellcastingConfig.enabled ? 'pointer-events-none opacity-40 grayscale blur-[1px]' : ''}>
         {/* REGISTRO DE NOVA MAGIA */}
         <div className={`border-4 rounded-3xl p-6 shadow-2xl relative overflow-hidden group transition-all ${isDark ? 'bg-[#121212] border-white/10' : 'bg-[#2d1b0d] border-[#8b4513]'}`}>
-          <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity duration-700 pointer-events-none">
-             <svg className="w-32 h-32 text-[#d4af37]" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0z" /></svg>
-          </div>
           
           <div className="relative z-10">
             <h2 className="cinzel text-xs font-bold text-[#d4af37] mb-6 uppercase tracking-[0.3em] border-b border-[#d4af37]/20 pb-2 inline-block">{t.new_spell_title}</h2>

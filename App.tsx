@@ -355,7 +355,7 @@ const App: React.FC = () => {
       case Tab.ClassFeatures:
         return <ClassFeatures character={character} updateCharacter={updateCharacter} onSelectSubclass={() => setShowSubclassModal(true)} theme={theme} />;
       case Tab.Magic: 
-        return <Spellbook character={character} updateCharacter={updateCharacter} theme={theme} />;
+        return <Spellbook character={character} updateCharacter={updateCharacter} theme={theme} showClassFeaturesTab={showClassFeaturesTab} />;
       case Tab.History: 
         return <Backstory character={character} updateCharacter={updateCharacter} onImageUpload={handleImageUpload} />;
       case Tab.Settings: 

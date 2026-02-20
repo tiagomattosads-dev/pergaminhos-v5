@@ -138,6 +138,7 @@ const Settings: React.FC<Props> = ({
           icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.54 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.784.57-1.838-.196-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>}
           title={t.hero_seal}
           description={t.wanderer}
+          onClick={() => onNavigate('SUBSCRIPTION')}
           action={
             <button 
               onClick={(e) => { e.stopPropagation(); onNavigate('SUBSCRIPTION'); }}
@@ -193,9 +194,18 @@ const Settings: React.FC<Props> = ({
               <div className={`w-12 h-6 rounded-full relative transition-colors cursor-not-allowed opacity-50 ${showClassFeaturesTab ? 'bg-[#d4af37]' : 'bg-gray-300'}`}>
                 <div className={`absolute top-1 w-4 h-4 rounded-full transition-all shadow-md bg-white ${showClassFeaturesTab ? 'left-7' : 'left-1'}`}></div>
               </div>
-              <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 transition-opacity whitespace-nowrap pointer-events-none ${isDark ? 'bg-white text-black' : 'bg-black text-white'}`}>
-                {t.in_development}
-                <div className={`absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent ${isDark ? 'border-t-white' : 'border-t-black'}`}></div>
+              <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-1.5 rounded-lg opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/tooltip:translate-y-0 pointer-events-none shadow-xl border ${
+                isDark 
+                  ? 'bg-[#1a1a1a] border-[#d4af37]/30 text-[#d4af37]' 
+                  : 'bg-[#fdf5e6] border-[#8b4513]/30 text-[#8b4513]'
+              }`}>
+                <span className="cinzel text-[10px] font-bold uppercase tracking-widest whitespace-nowrap flex items-center gap-2">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                  {t.in_development}
+                </span>
+                <div className={`absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-4 border-transparent ${
+                  isDark ? 'border-t-[#d4af37]/30' : 'border-t-[#8b4513]/30'
+                }`}></div>
               </div>
             </div>
           }
