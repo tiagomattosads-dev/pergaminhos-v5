@@ -55,13 +55,24 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
   const toggleSlot = (level: number, used: boolean) => {
     if (!spellcastingConfig.enabled) return;
     const slots = { ...character.spellSlots };
-    if (!slots[level]) slots[level] = { total: 2, used: 0 };
+    if (!slots[level]) slots[level] = { total: 0, used: 0 };
     
     if (used) {
         slots[level].used = Math.min(slots[level].total, slots[level].used + 1);
     } else {
         slots[level].used = Math.max(0, slots[level].used - 1);
     }
+    updateCharacter({ spellSlots: slots });
+  };
+
+  const updateSlotTotal = (level: number, total: number) => {
+    if (!spellcastingConfig.enabled) return;
+    const slots = { ...character.spellSlots };
+    const currentUsed = slots[level]?.used || 0;
+    slots[level] = {
+        total: total,
+        used: Math.min(currentUsed, total)
+    };
     updateCharacter({ spellSlots: slots });
   };
 
@@ -238,8 +249,11 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
 
             return (
               <div key={level} className={`border-2 rounded-3xl shadow-2xl overflow-hidden relative ${isDark ? 'bg-[#1a1a1a] border-white/5' : 'bg-[#fdf5e6] border-[#8b4513]'}`}>
-                <div className={`p-5 flex justify-between items-center border-b-2 ${isDark ? 'bg-black/40 border-white/5' : 'bg-[#8b4513] border-[#d4af37]/30'}`}>
-                  <div className="flex items-center gap-5">
+                <div className={`p-5 flex justify-between items-center border-b-2 relative overflow-hidden ${isDark ? 'bg-black/40 border-white/5' : 'bg-[#8b4513] border-[#d4af37]/30'}`}>
+                  {/* Textura do Cabeçalho */}
+                  <div className="absolute inset-0 opacity-20 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/leather.png')] mix-blend-overlay"></div>
+                  
+                  <div className="flex items-center gap-5 relative z-10">
                     <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center shadow-[0_5px_15px_rgba(0,0,0,0.5)] ${isDark ? 'bg-black border-[#d4af37]' : 'bg-[#2d1b0d] border-[#d4af37]'}`}>
                       <span className="fantasy-title text-2xl text-[#d4af37]">{level}</span>
                     </div>
@@ -248,21 +262,50 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
                     </h3>
                   </div>
 
-                  {level > 0 && character.spellSlots[level] && (
-                    <div className={`flex gap-3 items-center px-5 py-2.5 rounded-full border shadow-inner ${isDark ? 'bg-white/5 border-white/5' : 'bg-black/30 border-white/10'}`}>
-                      <span className="cinzel text-[8px] font-bold opacity-40 uppercase mr-1 tracking-widest">{t.spell_slots}</span>
-                      {[...Array(character.spellSlots[level].total)].map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => toggleSlot(level, i >= character.spellSlots[level].used)}
-                          className={`w-6 h-6 rounded-full border-2 transition-all duration-700 shadow-md ${
-                            i < character.spellSlots[level].used 
-                              ? 'bg-[#1a0f00] border-[#8b4513]/20 opacity-40' 
-                              : 'bg-gradient-to-tr from-[#d4af37] to-[#fffacd] border-[#fffacd] animate-pulse shadow-[0_0_15px_rgba(212,175,55,0.7)]'
-                          }`}
-                          title={i < character.spellSlots[level].used ? (lang === 'pt' ? "Espaço Consumido" : "Slot Consumed") : (lang === 'pt' ? "Canalizar Poder" : "Channel Power")}
-                        />
-                      ))}
+                  {level > 0 && (
+                    <div className={`relative z-10 flex flex-col sm:flex-row gap-3 items-center px-4 py-2 rounded-xl border shadow-inner ${isDark ? 'bg-black/40 border-white/10' : 'bg-[#fdf5e6]/80 border-[#8b4513]/20'}`}>
+                      
+                      <div className="flex items-center gap-3">
+                        <span className={`cinzel text-[10px] sm:text-xs font-bold uppercase tracking-widest ${isDark ? 'text-[#d4af37]' : 'text-[#3e2723]'}`}>{t.spell_slots}</span>
+                        
+                        <div className={`relative w-10 h-10 flex items-center justify-center rounded-lg border-2 transition-colors shadow-sm ${
+                          isDark ? 'bg-[#1a1a1a] border-[#d4af37] hover:bg-[#2d1b0d]' : 'bg-white border-[#8b4513] hover:bg-[#fffacd]'
+                        }`}>
+                          <select
+                            value={character.spellSlots[level]?.total || 0}
+                            onChange={(e) => updateSlotTotal(level, parseInt(e.target.value))}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                          >
+                            {[0, 1, 2, 3, 4].map(n => (
+                              <option key={n} value={n} className={isDark ? "bg-[#1a1a1a]" : "bg-[#fdf5e6]"}>{n}</option>
+                            ))}
+                          </select>
+                          <span className={`cinzel font-bold text-xl ${isDark ? 'text-[#d4af37]' : 'text-[#3e2723]'}`}>
+                            {character.spellSlots[level]?.total || 0}
+                          </span>
+                        </div>
+                      </div>
+
+                      {character.spellSlots[level]?.total > 0 && (
+                        <>
+                          <div className={`hidden sm:block w-px h-6 ${isDark ? 'bg-[#d4af37]/30' : 'bg-[#8b4513]/30'}`}></div>
+                          
+                          <div className="flex gap-1.5">
+                            {[...Array(character.spellSlots[level]?.total || 0)].map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => toggleSlot(level, i >= (character.spellSlots[level]?.used || 0))}
+                                className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 transition-all duration-300 shadow-sm ${
+                                  i < (character.spellSlots[level]?.used || 0)
+                                    ? 'bg-transparent border-current opacity-30 scale-90' 
+                                    : (isDark ? 'bg-[#d4af37] border-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.5)]' : 'bg-[#8b4513] border-[#8b4513] shadow-[0_0_5px_rgba(139,69,19,0.3)]')
+                                } ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}
+                                title={i < (character.spellSlots[level]?.used || 0) ? (lang === 'pt' ? "Espaço Consumido" : "Slot Consumed") : (lang === 'pt' ? "Disponível" : "Available")}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -282,14 +325,20 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
                             {level > 0 && (
                               <button 
                                 onClick={() => togglePrepare(spell.name)}
-                                className={`mt-1 flex-none w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-all duration-500 ${
+                                className={`mt-1 flex-none w-12 h-12 rounded-xl border-2 flex items-center justify-center transition-all duration-300 group/check ${
                                   spell.prepared 
-                                  ? (isDark ? 'bg-[#d4af37] border-[#d4af37] text-[#121212]' : 'bg-[#8b4513] border-[#8b4513] text-[#d4af37]') + ' shadow-[0_5px_15px_rgba(212,175,55,0.4)] scale-110' 
-                                  : 'border-white/10 text-white/10 hover:border-[#d4af37]/40 hover:scale-105'
+                                  ? (isDark ? 'bg-[#d4af37] border-[#d4af37] text-[#1a1a1a]' : 'bg-[#8b4513] border-[#8b4513] text-[#fdf5e6]') + ' shadow-[0_0_15px_rgba(212,175,55,0.5)] scale-105' 
+                                  : (isDark ? 'bg-black/40 border-white/10 text-white/20' : 'bg-[#3d2511]/5 border-[#8b4513]/20 text-[#8b4513]/40') + ' hover:border-[#d4af37]/60 hover:bg-[#d4af37]/10'
                                 }`}
                                 title={spell.prepared ? (lang === 'pt' ? "Magia Preparada" : "Spell Prepared") : (lang === 'pt' ? "Preparar Magia" : "Prepare Spell")}
                               >
-                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>
+                                {spell.prepared ? (
+                                  <svg className="w-7 h-7 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                ) : (
+                                  <div className="w-4 h-4 rounded-sm border-2 border-current opacity-50 group-hover/check:opacity-100 transition-opacity" />
+                                )}
                               </button>
                             )}
                             <div className="flex flex-col">

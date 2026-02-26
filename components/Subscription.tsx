@@ -85,6 +85,29 @@ const Subscription: React.FC<Props> = ({ theme, onBack }) => {
         </p>
       </header>
 
+      {/* MENSAGEM DO DESENVOLVEDOR */}
+      <div className={`max-w-4xl mx-auto p-6 rounded-2xl border-2 shadow-lg flex gap-4 items-start ${
+        isDark 
+          ? 'bg-[#1a1a1a] border-[#d4af37]/30 text-[#e8d5b5]' 
+          : 'bg-[#fffacd] border-[#8b4513]/30 text-[#3e2723]'
+      }`}>
+        <div className={`flex-none w-12 h-12 rounded-full flex items-center justify-center border-2 ${
+          isDark ? 'bg-[#2d1b0d] border-[#d4af37] text-[#d4af37]' : 'bg-[#fdf5e6] border-[#8b4513] text-[#8b4513]'
+        }`}>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div className="flex-1">
+          <h4 className={`cinzel text-sm font-bold uppercase tracking-widest mb-2 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>
+            Mensagem do Desenvolvedor
+          </h4>
+          <p className="parchment-text text-sm leading-relaxed opacity-90 italic">
+            "Você está usando uma versão com acesso total ao Pergaminho, exceto pelas funções em desenvolvimento. Ainda não temos data prevista para o lançamento com os acessos limitados, mas anunciaremos com antecedência quando tivermos. Aqui é o Dev do app, e agradeço demais por usarem o Pergaminho! Boa aventura!"
+          </p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-4">
         <PlanCard 
           name="Andarilho"

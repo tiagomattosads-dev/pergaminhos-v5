@@ -318,6 +318,9 @@ const App: React.FC = () => {
 
   const renderTab = () => {
     if (isGlobalSettingsOpen) {
+      if (activeTab === Tab.Subscription) {
+        return <Subscription theme={theme} onBack={() => setActiveTab(Tab.Settings)} />;
+      }
       return (
         <Settings 
           character={character || undefined} 
@@ -328,6 +331,8 @@ const App: React.FC = () => {
             if (t === 'SELECTION') {
                setIsGlobalSettingsOpen(false);
                setSelectedCharId(null);
+            } else if (t === 'SUBSCRIPTION') {
+               setActiveTab(Tab.Subscription);
             } else {
                setActiveTab(t as Tab);
                setIsGlobalSettingsOpen(false);

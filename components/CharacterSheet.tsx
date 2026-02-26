@@ -404,7 +404,16 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                       </div>
                       <div className="flex-1">
                         <span className="block text-[9px] cinzel font-bold uppercase tracking-widest opacity-70">{t.hit_dice}</span>
-                        <span className="font-bold text-xl block mt-1 tracking-tighter">{character.classMetadata?.hitDie || '—'}</span>
+                        {!showClassFeaturesTab ? (
+                          <input 
+                            type="text" 
+                            value={character.classMetadata?.hitDie || ''} 
+                            onChange={(e) => updateCharacter({ classMetadata: { ...(character.classMetadata as any), hitDie: e.target.value } })} 
+                            className={`w-full text-center font-bold bg-transparent outline-none text-xl ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}
+                          />
+                        ) : (
+                          <span className="font-bold text-xl block mt-1 tracking-tighter">{character.classMetadata?.hitDie || '—'}</span>
+                        )}
                       </div>
                     </div>
                   </>
