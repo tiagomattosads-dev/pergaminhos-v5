@@ -446,7 +446,7 @@ export const subclassTranslations: Record<string, { pt: string, en: string }> = 
 
 export const skillTranslations: Record<string, { pt: string, en: string }> = {
   'Acrobacia': { pt: 'Acrobacia', en: 'Acrobatics' },
-  'Adestrar Animais': { pt: 'Adestrar Animais', en: 'Animal Handling' },
+  'Lidar com Animais': { pt: 'Lidar com Animais', en: 'Animal Handling' },
   'Arcanismo': { pt: 'Arcanismo', en: 'Arcana' },
   'Atletismo': { pt: 'Atletismo', en: 'Athletics' },
   'Atuação': { pt: 'Atuação', en: 'Performance' },

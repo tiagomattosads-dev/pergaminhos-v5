@@ -63,7 +63,6 @@ export const SUBCLASSES_PHB: Record<string, string[]> = {
 
 export const SKILLS: Skill[] = [
   { name: 'Acrobacia', attribute: Attribute.DES, proficient: false },
-  { name: 'Adestrar Animais', attribute: Attribute.SAB, proficient: false },
   { name: 'Arcanismo', attribute: Attribute.INT, proficient: true },
   { name: 'Atletismo', attribute: Attribute.FOR, proficient: false },
   { name: 'Atuação', attribute: Attribute.CAR, proficient: false },
@@ -73,6 +72,7 @@ export const SKILLS: Skill[] = [
   { name: 'Intimidação', attribute: Attribute.CAR, proficient: false },
   { name: 'Intuição', attribute: Attribute.SAB, proficient: false },
   { name: 'Investigação', attribute: Attribute.INT, proficient: true },
+  { name: 'Lidar com Animais', attribute: Attribute.SAB, proficient: false },
   { name: 'Medicina', attribute: Attribute.SAB, proficient: false },
   { name: 'Natureza', attribute: Attribute.INT, proficient: false },
   { name: 'Percepção', attribute: Attribute.SAB, proficient: true },
