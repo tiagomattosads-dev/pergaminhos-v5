@@ -73,9 +73,12 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
   }, []);
 
   const profBonus = useMemo(() => {
+    if (character.proficiencyBonusOverride !== undefined) {
+      return character.proficiencyBonusOverride;
+    }
     const currentLevel = getLevelFromXP(character.exp);
     return getProficiencyFromLevel(currentLevel);
-  }, [character.exp]);
+  }, [character.exp, character.proficiencyBonusOverride]);
 
   const passivePerception = useMemo(() => {
     const wisMod = getModifier(character.stats[Attribute.SAB]);
@@ -294,7 +297,22 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
               <div className="w-full flex justify-between items-center z-10">
                 <div className={`flex flex-col items-center backdrop-blur-sm border p-1.5 rounded-lg w-16 shadow-sm ${isDark ? 'bg-black/40 border-white/10' : 'bg-white/70 border-[#8b4513]/20'}`}>
                   <span className={`text-[8px] cinzel font-bold uppercase tracking-wider ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{t.prof_bonus}</span>
-                  <span className={`text-lg font-bold fantasy-title ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}>+{profBonus}</span>
+                  <div className="flex items-center justify-center w-full">
+                    <span className={`text-lg font-bold fantasy-title ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}>+</span>
+                    <input 
+                      type="number" 
+                      value={character.proficiencyBonusOverride !== undefined ? character.proficiencyBonusOverride : profBonus} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '') {
+                           updateCharacter({ proficiencyBonusOverride: undefined });
+                        } else {
+                           updateCharacter({ proficiencyBonusOverride: parseInt(val) });
+                        }
+                      }} 
+                      className={`w-8 text-center bg-transparent focus:outline-none font-bold text-lg fantasy-title [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`} 
+                    />
+                  </div>
                 </div>
                 <div className={`flex flex-col items-center backdrop-blur-sm border p-1.5 rounded-lg w-20 shadow-sm ${isDark ? 'bg-black/40 border-white/10' : 'bg-white/70 border-[#8b4513]/20'}`}>
                   <span className={`text-[6px] cinzel font-bold uppercase tracking-wider text-center leading-tight ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{t.passive_perception}</span>
