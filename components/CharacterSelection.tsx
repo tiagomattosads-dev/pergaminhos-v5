@@ -148,7 +148,7 @@ const CharacterSelection: React.FC<Props> = ({
       {/* Conteúdo rolável */}
       <div className="relative z-10 w-full min-h-full flex flex-col items-center p-4 py-8 md:py-20">
         <header className="text-center mb-10 md:mb-16 px-4">
-          <h1 className="fantasy-title text-5xl md:text-8xl text-[#d4af37] drop-shadow-[0_4px_25px_rgba(212,175,55,0.4)] mb-4 uppercase tracking-[0.1em] leading-tight">
+          <h1 className="fantasy-title text-[65px] text-[#d4af37] drop-shadow-[0_4px_25px_rgba(212,175,55,0.4)] mb-4 uppercase tracking-[0.1em] leading-tight">
             {language === 'pt' ? 'O Pergaminho' : 'The Scroll'}
           </h1>
           <div className="flex flex-col items-center gap-3">
