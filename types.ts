@@ -13,6 +13,7 @@ export interface Skill {
   attribute: Attribute;
   proficient: boolean;
   expert?: boolean;
+  icon?: any;
 }
 
 export interface Item {
@@ -47,6 +48,13 @@ export interface Spell {
   description: string;
 }
 
+export interface Currency {
+  pp: number;
+  gp: number;
+  sp: number;
+  cp: number;
+}
+
 export interface ClassMetadata {
   isSpellcaster: boolean;
   casterType: "full" | "half" | "third" | "pact" | "none";
@@ -77,6 +85,18 @@ export interface Companion {
   attacks: CompanionAttack[];
   personalityTrait: string;
   flaw: string;
+}
+
+export interface PresetCharacter {
+  id: string;
+  name: string;
+  class_id: string;
+  subclass_id: string | null;
+  race: string;
+  level: number;
+  description: string;
+  data: Character;
+  created_at?: string;
 }
 
 export interface Character {
@@ -132,4 +152,5 @@ export interface Character {
   favoredEnemies?: string[];
   favoredTerrains?: string[];
   companion?: Companion;
+  currency: Currency;
 }

@@ -119,7 +119,7 @@ export const translations = {
     register_btn: "Registrar-se",
     has_record: "Já possuo registro na biblioteca",
     start_journey: "Desejo iniciar minha jornada agora",
-    runic_encryption: "Magia de Criptografia Rúnica",
+    runic_encryption: "Desenvolvido por Arvek Entertainment",
     journey_hero: "Jornada do Aventureiro",
     legendary: "LENDÁRIO",
     accumulation: "Acúmulo",
@@ -168,7 +168,13 @@ export const translations = {
     add_companion_attack: "Adicionar Ataque Animal",
     passive_perception: "Percepção Passiva",
     languages: "Idiomas",
-    languages_placeholder: "Comum, Élfico, Anão..."
+    languages_placeholder: "Comum, Élfico, Anão...",
+    home_welcome: "Bem-vindo ao Pergaminho",
+    home_subtitle: "Escolha para onde deseja ir",
+    home_my_characters: "Minhas Fichas",
+    home_library: "Biblioteca de Fichas",
+    home_description: "Gerencie seus personagens ou escolha uma ficha pronta para começar.",
+    back_to_home: "Voltar ao Início"
   },
   en: {
     sheet: "Sheet",
@@ -289,7 +295,7 @@ export const translations = {
     register_btn: "Register",
     has_record: "I already have a record",
     start_journey: "I want to start my journey now",
-    runic_encryption: "Runic Encryption Magic",
+    runic_encryption: "Developed by Arvek Entertainment",
     journey_hero: "Hero's Journey",
     legendary: "LEGENDARY",
     accumulation: "Accrued",
@@ -338,7 +344,13 @@ export const translations = {
     add_companion_attack: "Add Animal Attack",
     passive_perception: "Passive Perception",
     languages: "Languages",
-    languages_placeholder: "Common, Elvish, Dwarvish..."
+    languages_placeholder: "Common, Elvish, Dwarvish...",
+    home_welcome: "Welcome to the Scroll",
+    home_subtitle: "Choose where you want to go",
+    home_my_characters: "My Characters",
+    home_library: "Character Library",
+    home_description: "Manage your characters or choose a preset to start.",
+    back_to_home: "Back to Home"
   }
 };
 

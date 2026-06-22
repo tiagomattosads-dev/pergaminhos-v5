@@ -1,7 +1,9 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Character, Attribute } from './types';
-import { INITIAL_CHARACTER, createNewCharacter, getLevelFromXP, getProficiencyFromLevel, XP_TABLE, SUBCLASS_LEVELS, SUBCLASSES_PHB, CLASSES_PHB } from './constants';
+import { AnimatePresence } from 'motion/react';
+import { Character, Attribute, Weapon, Currency } from './types';
+import { INITIAL_CHARACTER, createNewCharacter, getLevelFromXP, getProficiencyFromLevel, XP_TABLE, SUBCLASS_LEVELS, SUBCLASSES_PHB, CLASSES_PHB, CLASS_ICONS } from './constants';
+import { LayoutGrid, Tent } from 'lucide-react';
 import { translations, classTranslations, subclassTranslations, raceTranslations } from './translations';
 import { supabase } from './services/supabase';
 import CharacterSheet from './components/CharacterSheet';
@@ -13,6 +15,11 @@ import Settings from './components/Settings';
 import Subscription from './components/Subscription';
 import CharacterSelection from './components/CharacterSelection';
 import AuthScreen from './components/AuthScreen';
+import Library from './components/Library';
+import DungeonMasterRoom from './components/DungeonMasterRoom';
+import ItemShop, { ShopItem } from './components/ItemShop';
+import Home from './components/Home';
+import { PresetCharacter } from './types';
 
 enum Tab {
   Sheet = 'SHEET',
@@ -58,6 +65,10 @@ const App: React.FC = () => {
     return saved !== null ? saved === 'true' : true;
   });
 
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [showDungeonMasterRoom, setShowDungeonMasterRoom] = useState(false);
+  const [showItemShop, setShowItemShop] = useState(false);
+  const [showHome, setShowHome] = useState(true);
   const [isGlobalSettingsOpen, setIsGlobalSettingsOpen] = useState(false);
   const [showDeathOverlay, setShowDeathOverlay] = useState(true);
   const [showSubclassModal, setShowSubclassModal] = useState(false);
@@ -218,6 +229,8 @@ const App: React.FC = () => {
     setIsAuthenticated(false);
     setSelectedCharId(null);
     setIsGlobalSettingsOpen(false);
+    setShowHome(true);
+    setShowLibrary(false);
   };
 
   const updateCharacter = useCallback((updates: Partial<Character>) => {
@@ -275,6 +288,36 @@ const App: React.FC = () => {
     }
   };
 
+  const handleUsePreset = async (preset: PresetCharacter) => {
+    if (!session?.user) return;
+
+    const newChar = {
+      ...preset.data,
+      id: crypto.randomUUID(),
+      language: appLanguage
+    };
+
+    try {
+      const { error } = await supabase
+        .from('characters')
+        .insert([{ 
+          id: newChar.id,
+          user_id: session.user.id,
+          data: newChar 
+        }]);
+
+      if (error) throw error;
+
+      setAllCharacters(prev => [newChar, ...prev]);
+      setSelectedCharId(newChar.id);
+      setShowLibrary(false);
+      setShowHome(false);
+      setIsGlobalSettingsOpen(false);
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    }
+  };
+
   const handleImport = async (importedChar: Character) => {
     if (!session?.user) return;
 
@@ -311,6 +354,23 @@ const App: React.FC = () => {
 
       setAllCharacters(prev => prev.filter(c => c.id !== id));
       if (selectedCharId === id) setSelectedCharId(null);
+    } catch (err: any) {
+      setErrorMessage(err.message);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!window.confirm("Tem certeza que deseja apagar todas as fichas?")) return;
+    try {
+      const { error } = await supabase
+        .from('characters')
+        .delete()
+        .in('id', allCharacters.map(c => c.id));
+
+      if (error) throw error;
+
+      setAllCharacters([]);
+      setSelectedCharId(null);
     } catch (err: any) {
       setErrorMessage(err.message);
     }
@@ -458,22 +518,56 @@ const App: React.FC = () => {
       );
     }
 
+    if (showLibrary) {
+      return (
+        <Library 
+          onUsePreset={handleUsePreset}
+          onClose={() => setShowLibrary(false)}
+          language={appLanguage}
+        />
+      );
+    }
+
+    if (showDungeonMasterRoom) {
+      return (
+        <DungeonMasterRoom 
+          onClose={() => setShowDungeonMasterRoom(false)}
+          language={appLanguage}
+        />
+      );
+    }
+
+    if (showHome) {
+      return (
+        <Home 
+          onMyCharacters={() => setShowHome(false)}
+          onLibrary={() => setShowLibrary(true)}
+          onDungeonMasterRoom={() => setShowDungeonMasterRoom(true)}
+          onLogout={handleLogout}
+          onOpenSettings={() => setIsGlobalSettingsOpen(true)}
+          language={appLanguage}
+        />
+      );
+    }
+
     return (
       <CharacterSelection 
         characters={allCharacters} 
         onSelect={setSelectedCharId} 
         onCreate={handleCreateNew}
         onDelete={handleDelete}
+        onDeleteAll={handleDeleteAll}
         onImport={handleImport}
         onLogout={handleLogout}
         onOpenSettings={() => setIsGlobalSettingsOpen(true)}
+        onBackToHome={() => setShowHome(true)}
         language={appLanguage}
       />
     );
   }
 
   return (
-    <div className={`fixed inset-0 flex flex-col overflow-hidden selection:bg-orange-200 ${theme === 'dark' ? 'dark-mode' : ''}`}>
+    <div className={`fixed inset-0 flex flex-col overflow-hidden ${theme === 'dark' ? 'dark-mode' : ''}`}>
       
       {/* Container que recebe os filtros de morte */}
       <div className={`absolute inset-0 flex flex-col transition-all duration-1000 ${
@@ -519,6 +613,12 @@ const App: React.FC = () => {
                     
                     <div className="flex items-center mt-1.5 md:mt-2">
                       <div className={`px-2 md:px-3 py-0.5 md:py-1 rounded-md bg-[#3d2511]/80 border border-[#8b4513]/30 flex items-center gap-2 shadow-inner`}>
+                        {character && (
+                          (() => {
+                            const Icon = CLASS_ICONS[character.class] || LayoutGrid;
+                            return <Icon className="w-3 h-3 md:w-4 md:h-4 text-[#d4af37]" />;
+                          })()
+                        )}
                         <span className="text-[7px] md:text-[10px] uppercase tracking-[0.2em] cinzel font-bold text-[#e8d5b5] whitespace-nowrap">{translateValue(character?.class, classTranslations) || 'D&D 5e'}</span>
                         {character?.subclass && (
                           <>
@@ -532,17 +632,27 @@ const App: React.FC = () => {
                     </div>
                   </div>
 
-                  <button 
-                    onClick={() => {
-                       setIsGlobalSettingsOpen(true);
-                       setActiveTab(Tab.Settings);
-                    }}
-                    className={`md:hidden flex-none p-2.5 rounded-xl border-2 transition-all duration-300 shadow-lg ${activeTab === Tab.Settings || activeTab === Tab.Subscription || isGlobalSettingsOpen ? 'bg-[#d4af37] border-[#fffacd] text-[#1a0f00]' : 'bg-[#1a0f00]/50 border-[#8b4513]/40 text-[#d4af37]'}`}
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    </svg>
-                  </button>
+                  <div className="md:hidden flex flex-col gap-2">
+                    <button 
+                      onClick={() => {
+                        setShowItemShop(true);
+                      }}
+                      className={`flex-none p-2.5 rounded-xl border-2 transition-all duration-300 shadow-lg bg-[#1a0f00]/50 border-[#8b4513]/40 text-[#d4af37]`}
+                    >
+                      <Tent className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={() => {
+                         setIsGlobalSettingsOpen(true);
+                         setActiveTab(Tab.Settings);
+                      }}
+                      className={`flex-none p-2.5 rounded-xl border-2 transition-all duration-300 shadow-lg ${activeTab === Tab.Settings || activeTab === Tab.Subscription || isGlobalSettingsOpen ? 'bg-[#d4af37] border-[#fffacd] text-[#1a0f00]' : 'bg-[#1a0f00]/50 border-[#8b4513]/40 text-[#d4af37]'}`}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Status e Experiência */}
@@ -622,19 +732,31 @@ const App: React.FC = () => {
                     </div>
                   </div>
 
-                  <button 
-                    onClick={() => {
-                       setIsGlobalSettingsOpen(true);
-                       setActiveTab(Tab.Settings);
-                    }}
-                    className={`hidden md:flex flex-none p-3.5 rounded-2xl border-2 transition-all duration-300 shadow-xl active:scale-95 ${activeTab === Tab.Settings || activeTab === Tab.Subscription || isGlobalSettingsOpen ? 'bg-[#d4af37] border-[#fffacd] text-[#1a0f00] shadow-[0_0_20px_rgba(212,175,55,0.4)]' : 'bg-[#1a0f00] border-[#8b4513]/60 text-[#d4af37] hover:bg-[#2d1b0d] hover:border-[#d4af37]'}`}
-                    title={t.settings}
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </button>
+                  <div className="hidden md:flex flex-col gap-2">
+                    <button 
+                      onClick={() => {
+                        setShowItemShop(true);
+                      }}
+                      className="flex-none p-3.5 rounded-2xl border-2 transition-all duration-300 shadow-xl active:scale-95 bg-[#1a0f00] border-[#8b4513]/60 text-[#d4af37] hover:bg-[#2d1b0d] hover:border-[#d4af37]"
+                      title={appLanguage === 'pt' ? "Loja de Itens" : "Item Shop"}
+                    >
+                      <Tent className="w-6 h-6" />
+                    </button>
+
+                    <button 
+                      onClick={() => {
+                         setIsGlobalSettingsOpen(true);
+                         setActiveTab(Tab.Settings);
+                      }}
+                      className={`flex-none p-3.5 rounded-2xl border-2 transition-all duration-300 shadow-xl active:scale-95 ${activeTab === Tab.Settings || activeTab === Tab.Subscription || isGlobalSettingsOpen ? 'bg-[#d4af37] border-[#fffacd] text-[#1a0f00] shadow-[0_0_20px_rgba(212,175,55,0.4)]' : 'bg-[#1a0f00] border-[#8b4513]/60 text-[#d4af37] hover:bg-[#2d1b0d] hover:border-[#d4af37]'}`}
+                      title={t.settings}
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -849,6 +971,125 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {showItemShop && character && (
+          <ItemShop 
+            character={character}
+            onClose={() => setShowItemShop(false)}
+            language={appLanguage}
+            theme={theme}
+            onPurchase={(item: ShopItem) => {
+              if (character) {
+                // Nova lógica de gasto: tenta gastar a moeda específica, se não tiver, "quebra" a superior
+                const spendCurrency = (current: Currency, amount: number, unitStr: string) => {
+                  const units: (keyof Currency)[] = ['cp', 'sp', 'gp', 'pp'];
+                  const rates = { cp: 1, sp: 10, gp: 100, pp: 1000 };
+                  
+                  // Mapear unidade da string para chave do objeto
+                  const unitMap: Record<string, keyof Currency> = {
+                    'pl': 'pp',
+                    'po': 'gp',
+                    'pp': 'sp',
+                    'pc': 'cp'
+                  };
+                  
+                  const targetUnit = unitMap[unitStr.toLowerCase()] || 'gp';
+                  let remainingToPayInCP = amount * rates[targetUnit];
+                  let newCurrency = { ...current };
+
+                  // 1. Tenta pagar com a moeda exata primeiro
+                  const canPayWithTarget = Math.min(newCurrency[targetUnit], Math.floor(remainingToPayInCP / rates[targetUnit]));
+                  newCurrency[targetUnit] -= canPayWithTarget;
+                  remainingToPayInCP -= canPayWithTarget * rates[targetUnit];
+
+                  if (remainingToPayInCP <= 0) return newCurrency;
+
+                  // 2. Tenta pagar com moedas menores (sem converter para cima automaticamente depois)
+                  const targetIndex = units.indexOf(targetUnit);
+                  for (let i = targetIndex - 1; i >= 0; i--) {
+                    const smallerUnit = units[i];
+                    const canPay = Math.min(newCurrency[smallerUnit], Math.floor(remainingToPayInCP / rates[smallerUnit]));
+                    newCurrency[smallerUnit] -= canPay;
+                    remainingToPayInCP -= canPay * rates[smallerUnit];
+                    if (remainingToPayInCP <= 0) return newCurrency;
+                  }
+
+                  // 3. Se ainda faltar, "quebra" moedas maiores
+                  for (let i = targetIndex + 1; i < units.length; i++) {
+                    const largerUnit = units[i];
+                    if (newCurrency[largerUnit] > 0) {
+                      newCurrency[largerUnit] -= 1;
+                      let changeInCP = rates[largerUnit] - remainingToPayInCP;
+                      remainingToPayInCP = 0;
+                      
+                      // Distribui o troco da maior para a menor
+                      for (let j = i - 1; j >= 0; j--) {
+                        const changeUnit = units[j];
+                        newCurrency[changeUnit] += Math.floor(changeInCP / rates[changeUnit]);
+                        changeInCP %= rates[changeUnit];
+                      }
+                      return newCurrency;
+                    }
+                  }
+                  
+                  return null;
+                };
+
+                const match = item.price.match(/(\d+)\s*(po|pp|pc|pl)/i);
+                const c = character.currency || { pp: 0, gp: 0, sp: 0, cp: 0 };
+
+                if (match) {
+                  const val = parseInt(match[1]);
+                  const unit = match[2].toLowerCase();
+                  const newCurrency = spendCurrency(c, val, unit);
+
+                  if (newCurrency) {
+
+                  // Se for arma, adiciona ao array de armas
+                  if (item.category === 'Armas') {
+                    const newWeapon: Weapon = {
+                      name: item.name,
+                      bonus: '+0',
+                      damage: item.damage || '1d6',
+                      type: item.weaponCategory || 'Simples',
+                      description: item.properties && item.properties.length > 0 
+                        ? `${item.properties.join(', ')}. ${item.description}`
+                        : item.description
+                    };
+                    updateCharacter({ 
+                      currency: newCurrency,
+                      weapons: [...(character.weapons || []), newWeapon],
+                      inventory: [...(character.inventory || []), {
+                        id: crypto.randomUUID(),
+                        name: item.name,
+                        weight: item.weight,
+                        quantity: 1,
+                        description: item.description,
+                        equipped: true
+                      }]
+                    });
+                  } else {
+                    // Caso contrário, adiciona ao inventário geral
+                    updateCharacter({
+                      currency: newCurrency,
+                      inventory: [...(character.inventory || []), {
+                        id: crypto.randomUUID(),
+                        name: item.name,
+                        weight: item.weight,
+                        quantity: 1,
+                        description: item.description,
+                        equipped: false
+                      }]
+                    });
+                  }
+                }
+              }
+            }
+          }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
