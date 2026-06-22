@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Character, Item } from '../types';
 import { translations } from '../translations';
 
@@ -9,12 +9,62 @@ interface Props {
   theme?: 'light' | 'dark';
 }
 
+interface CoinSlotProps {
+  label: string;
+  short: string;
+  bg: string;
+  borderColor: string;
+  textColor: string;
+  value: number;
+  onChange: (val: number) => void;
+  isDark: boolean;
+}
+
+const CoinSlot: React.FC<CoinSlotProps> = ({ label, short, bg, borderColor, textColor, value, onChange, isDark }) => {
+  const [inputValue, setInputValue] = useState(value.toString());
+
+  useEffect(() => {
+    setInputValue(value.toString());
+  }, [value]);
+
+  return (
+    <div className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all group hover:scale-105 ${isDark ? 'bg-black/40 border-[#d4af37]/20 hover:border-[#d4af37]' : 'bg-[#8b4513]/5 border-[#8b4513]/20 hover:border-[#8b4513]'}`}>
+      <div className={`w-12 h-12 rounded-full bg-gradient-to-tr ${bg} border-2 shadow-[0_4px_10px_rgba(0,0,0,0.3)] flex items-center justify-center mb-2 relative`} style={{ borderColor }}>
+        <div className="absolute inset-0 rounded-full bg-[url('https://www.transparenttextures.com/patterns/p6.png')] opacity-20"></div>
+        <span className="font-bold text-lg drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" style={{ color: textColor }}>{short}</span>
+      </div>
+      <input 
+        type="text"
+        inputMode="numeric"
+        value={inputValue}
+        onChange={(e) => {
+          const val = e.target.value;
+          if (val === '' || /^[0-9]*$/.test(val)) {
+            setInputValue(val);
+            if (val !== '') {
+              onChange(parseInt(val) || 0);
+            }
+          }
+        }}
+        onBlur={() => {
+          setInputValue(value.toString());
+        }}
+        onFocus={(e) => e.target.select()}
+        className={`bg-transparent text-xl font-bold fantasy-title text-center w-full focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`} 
+      />
+      <span className={`text-[8px] cinzel font-bold uppercase tracking-[0.2em] opacity-60 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{label}</span>
+    </div>
+  );
+};
+
 const Inventory: React.FC<Props> = ({ character, updateCharacter, theme = 'light' }) => {
   const [newItem, setNewItem] = useState({ name: '', weight: 0, quantity: 1, description: '' });
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const isDark = theme === 'dark';
   const lang = character.language || 'pt';
   const t = translations[lang];
+
+  const currency = character.currency || { pp: 0, gp: 0, sp: 0, cp: 0 };
 
   const totalWeight = character.inventory.reduce((sum, item) => sum + (item.weight * item.quantity), 0);
   const carryCapacity = (character.stats.FOR || 10) * 15;
@@ -23,6 +73,30 @@ const Inventory: React.FC<Props> = ({ character, updateCharacter, theme = 'light
   const isEncumbered = totalWeight > (character.stats.FOR || 10) * 5;
   const isHeavilyEncumbered = totalWeight > (character.stats.FOR || 10) * 10;
   const isOverLimit = totalWeight > carryCapacity;
+
+  const updateCurrency = (type: 'pp' | 'gp' | 'sp' | 'cp', value: number) => {
+    const newCurrency = { ...currency, [type]: Math.max(0, value) };
+    
+    // Conversão automática ascendente (D&D 5e)
+    // PC (cp) -> PP (sp) -> PO (gp) -> PL (pp)
+    
+    if (newCurrency.cp >= 10) {
+      newCurrency.sp += Math.floor(newCurrency.cp / 10);
+      newCurrency.cp %= 10;
+    }
+    
+    if (newCurrency.sp >= 10) {
+      newCurrency.gp += Math.floor(newCurrency.sp / 10);
+      newCurrency.sp %= 10;
+    }
+
+    if (newCurrency.gp >= 10) {
+      newCurrency.pp += Math.floor(newCurrency.gp / 10);
+      newCurrency.gp %= 10;
+    }
+
+    updateCharacter({ currency: newCurrency });
+  };
 
   const addItem = () => {
     if (!newItem.name) return;
@@ -78,21 +152,6 @@ const Inventory: React.FC<Props> = ({ character, updateCharacter, theme = 'light
     setDraggedIndex(null);
   };
 
-  const CoinSlot: React.FC<{ label: string; short: string; bg: string; borderColor: string; textColor: string }> = ({ label, short, bg, borderColor, textColor }) => (
-    <div className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all group hover:scale-105 ${isDark ? 'bg-black/40 border-[#d4af37]/20 hover:border-[#d4af37]' : 'bg-[#8b4513]/5 border-[#8b4513]/20 hover:border-[#8b4513]'}`}>
-      <div className={`w-12 h-12 rounded-full bg-gradient-to-tr ${bg} border-2 shadow-[0_4px_10px_rgba(0,0,0,0.3)] flex items-center justify-center mb-2 relative`} style={{ borderColor }}>
-        <div className="absolute inset-0 rounded-full bg-[url('https://www.transparenttextures.com/patterns/p6.png')] opacity-20"></div>
-        <span className="font-bold text-lg drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" style={{ color: textColor }}>{short}</span>
-      </div>
-      <input 
-        type="number" 
-        defaultValue={0} 
-        className={`bg-transparent text-xl font-bold fantasy-title text-center w-full focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`} 
-      />
-      <span className={`text-[8px] cinzel font-bold uppercase tracking-[0.2em] opacity-60 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{label}</span>
-    </div>
-  );
-
   return (
     <div className="flex flex-col gap-6 p-3 sm:p-6 lg:p-8 max-w-6xl mx-auto pb-24">
       
@@ -106,10 +165,10 @@ const Inventory: React.FC<Props> = ({ character, updateCharacter, theme = 'light
              <span className="h-px w-8 bg-current opacity-30"></span>
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <CoinSlot label={t.platinum} short="PL" bg="from-[#4a5568] via-[#e2e8f0] to-[#ffffff]" borderColor="#718096" textColor="#2d3748" />
-            <CoinSlot label={t.gold} short="PO" bg="from-[#b8860b] via-[#ffd700] to-[#fffacd]" borderColor="#8b4513" textColor="#5d4037" />
-            <CoinSlot label={t.silver} short="PP" bg="from-[#2d3748] via-[#cbd5e0] to-[#ffffff]" borderColor="#4a5568" textColor="#2d3748" />
-            <CoinSlot label={t.copper} short="PC" bg="from-[#5d4037] via-[#a16207] to-[#fef3c7]" borderColor="#5d4037" textColor="#3e2723" />
+            <CoinSlot label={t.platinum} short="PL" bg="from-[#4a5568] via-[#e2e8f0] to-[#ffffff]" borderColor="#718096" textColor="#2d3748" value={currency.pp} onChange={(val) => updateCurrency('pp', val)} isDark={isDark} />
+            <CoinSlot label={t.gold} short="PO" bg="from-[#b8860b] via-[#ffd700] to-[#fffacd]" borderColor="#8b4513" textColor="#5d4037" value={currency.gp} onChange={(val) => updateCurrency('gp', val)} isDark={isDark} />
+            <CoinSlot label={t.silver} short="PP" bg="from-[#2d3748] via-[#cbd5e0] to-[#ffffff]" borderColor="#4a5568" textColor="#2d3748" value={currency.sp} onChange={(val) => updateCurrency('sp', val)} isDark={isDark} />
+            <CoinSlot label={t.copper} short="PC" bg="from-[#5d4037] via-[#a16207] to-[#fef3c7]" borderColor="#5d4037" textColor="#3e2723" value={currency.cp} onChange={(val) => updateCurrency('cp', val)} isDark={isDark} />
           </div>
         </div>
 

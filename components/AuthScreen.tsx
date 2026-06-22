@@ -81,7 +81,7 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
   const currentSealColor = isDark ? 'from-amber-400 to-amber-700' : 'from-red-700 to-red-900';
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative selection:bg-[#d4af37]/40">
+    <div className="min-h-screen flex items-center justify-start p-4 pl-36 overflow-hidden relative">
       {/* Background Video solicitado */}
       <video 
         ref={videoRef}
@@ -90,7 +90,7 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
         loop 
         playsInline 
         className="fixed inset-0 w-full h-full object-cover z-0"
-        src="https://res.cloudinary.com/dutufef4s/video/upload/v1770328032/2970d572d03a4160ac6d731f004e9275_gysx0u.mp4"
+        src="https://res.cloudinary.com/dutufef4s/video/upload/v1773603748/bg_login1_yrnelq.mp4"
       />
 
       {/* Sutil gradiente para profundidade sem escurecer o centro */}
@@ -263,7 +263,7 @@ const AuthScreen: React.FC<Props> = ({ onLogin, theme, language }) => {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-          <p className="cinzel text-[9px] uppercase tracking-[0.5em] text-[#d4af37]/60 drop-shadow-lg">
+          <p className="cinzel text-[9px] uppercase tracking-[0.5em] text-white drop-shadow-lg">
             {t.runic_encryption}
           </p>
         </div>

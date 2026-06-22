@@ -1,15 +1,19 @@
 import React, { useState, useRef } from 'react';
 import { Character } from '../types';
 import { translations, classTranslations, raceTranslations } from '../translations';
+import { CLASS_ICONS } from '../constants';
+import { LayoutGrid } from 'lucide-react';
 
 interface Props {
   characters: Character[];
   onSelect: (id: string) => void;
   onCreate: () => void;
   onDelete: (id: string) => void;
+  onDeleteAll: () => void;
   onImport: (char: Character) => void;
   onLogout: () => void;
   onOpenSettings: () => void;
+  onBackToHome: () => void;
   language?: 'pt' | 'en';
 }
 
@@ -18,9 +22,11 @@ const CharacterSelection: React.FC<Props> = ({
   onSelect, 
   onCreate, 
   onDelete, 
+  onDeleteAll,
   onImport, 
   onLogout, 
   onOpenSettings,
+  onBackToHome,
   language = 'pt' 
 }) => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -112,7 +118,16 @@ const CharacterSelection: React.FC<Props> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-[#0d0700] overflow-y-auto custom-scrollbar selection:bg-[#d4af37]/30">
+    <div className="fixed inset-0 bg-[#0d0700] overflow-y-auto custom-scrollbar">
+      {/* Background Video */}
+      <video 
+        autoPlay 
+        muted 
+        loop 
+        playsInline 
+        className="fixed inset-0 w-full h-full object-cover z-0 opacity-40"
+        src="https://res.cloudinary.com/dutufef4s/video/upload/v1773600382/bg_tela_de_fichas_zsl9my.mp4"
+      />
       <div className="fixed inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/old-map.png')] pointer-events-none z-0"></div>
       
       {/* Botões de topo - Fixos */}
@@ -124,6 +139,16 @@ const CharacterSelection: React.FC<Props> = ({
         >
           <svg className="w-5 h-5 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924-1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          </svg>
+        </button>
+
+        <button 
+          onClick={onDeleteAll}
+          className="p-3 rounded-full border-2 border-red-900/30 bg-black/60 text-red-500 hover:bg-red-900/40 hover:text-white transition-all shadow-2xl group"
+          title={language === 'pt' ? 'Apagar todas as fichas' : 'Delete all characters'}
+        >
+          <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
         </button>
 
@@ -148,7 +173,7 @@ const CharacterSelection: React.FC<Props> = ({
       {/* Conteúdo rolável */}
       <div className="relative z-10 w-full min-h-full flex flex-col items-center p-4 py-8 md:py-20">
         <header className="text-center mb-10 md:mb-16 px-4">
-          <h1 className="fantasy-title text-[65px] text-[#d4af37] drop-shadow-[0_4px_25px_rgba(212,175,55,0.4)] mb-4 uppercase tracking-[0.1em] leading-tight">
+          <h1 className="fantasy-title text-[33px] text-[#d4af37] drop-shadow-[0_4px_25px_rgba(212,175,55,0.4)] mb-4 uppercase tracking-[0.1em] leading-tight text-center">
             {language === 'pt' ? 'O Pergaminho' : 'The Scroll'}
           </h1>
           <div className="flex flex-col items-center gap-3">
@@ -209,7 +234,11 @@ const CharacterSelection: React.FC<Props> = ({
                   {char.name}
                 </h3>
                 <div className="flex items-center gap-3 mt-2">
-                  <span className="cinzel text-[10px] text-[#8b4513] font-bold uppercase tracking-[0.1em] px-2 py-0.5 border border-[#8b4513]/20 rounded-md">
+                  <span className="cinzel text-[10px] text-[#8b4513] font-bold uppercase tracking-[0.1em] px-2 py-0.5 border border-[#8b4513]/20 rounded-md flex items-center gap-1.5">
+                    {(() => {
+                      const Icon = CLASS_ICONS[char.class] || LayoutGrid;
+                      return <Icon className="w-4 h-4 text-[#8b4513]" />;
+                    })()}
                     {translateValue(char.class, classTranslations)}
                   </span>
                   <span className="cinzel text-[10px] text-[#d4af37] bg-black/80 font-bold px-2 py-0.5 rounded-md shadow-sm">
@@ -262,6 +291,21 @@ const CharacterSelection: React.FC<Props> = ({
               {isDragging ? (language === 'pt' ? 'Solte o Pergaminho' : 'Drop the Scroll') : t.import_record}
             </span>
             <p className="mt-4 px-8 text-center parchment-text text-[11px] opacity-40 leading-tight">Carregue lendas salvas em outros dispositivos.</p>
+          </button>
+
+          {/* Botão Voltar ao Início */}
+          <button 
+            onClick={onBackToHome}
+            className="group relative h-80 bg-[#1a0f00]/40 border-2 border-[#8b4513]/40 rounded-3xl flex flex-col items-center justify-center transition-all duration-500 hover:border-[#d4af37] hover:bg-[#2d1b0d] hover:shadow-[0_0_40px_rgba(212,175,55,0.2)] shadow-xl overflow-hidden"
+          >
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.2)_0%,transparent_70%)] group-hover:opacity-20 transition-opacity"></div>
+            <div className="w-14 h-14 rounded-2xl border-2 border-[#8b4513]/60 flex items-center justify-center mb-4 group-hover:border-[#d4af37] group-hover:scale-110 transition-all duration-500 bg-black/40 shadow-inner">
+              <svg className="w-7 h-7 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </div>
+            <span className="cinzel font-bold text-[#d4af37] tracking-[0.2em] text-[10px] uppercase">{t.back_to_home}</span>
+            <p className="mt-4 px-8 text-center parchment-text text-[11px] opacity-40 leading-tight">{language === 'pt' ? 'Retornar para a tela inicial' : 'Return to the home screen'}</p>
           </button>
         </div>
 

@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Character } from '../types';
 import { translations, classTranslations, subclassTranslations } from '../translations';
-import { SUBCLASS_LEVELS } from '../constants';
+import { SUBCLASS_LEVELS, CLASS_ICONS } from '../constants';
+import { LayoutGrid } from 'lucide-react';
 import { BARBARIAN_FEATURES, WARRIOR_FEATURES, ROGUE_FEATURES, PALADIN_FEATURES, RANGER_FEATURES, HUNTER_FEATURES, FeatureInfo } from '../data/classFeaturesData';
 
 interface Props {
@@ -216,9 +217,15 @@ const ClassFeatures: React.FC<Props> = ({ character, updateCharacter, onSelectSu
         </div>
 
         <div className="flex flex-col text-center sm:text-left flex-grow relative z-10">
-          <h2 className={`fantasy-title text-4xl sm:text-6xl drop-shadow-md leading-tight ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}>
-            {translateValue(character.class, classTranslations)}
-          </h2>
+          <div className="flex items-center justify-center sm:justify-start gap-3">
+            {(() => {
+              const Icon = CLASS_ICONS[character.class] || LayoutGrid;
+              return <Icon className={`w-8 h-8 sm:w-10 sm:h-10 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`} />;
+            })()}
+            <h2 className={`fantasy-title text-4xl sm:text-6xl drop-shadow-md leading-tight ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}>
+              {translateValue(character.class, classTranslations)}
+            </h2>
+          </div>
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-3">
              {character.subclass ? (
                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">

@@ -1,7 +1,8 @@
 
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { Character, Attribute, Skill, Weapon, OtherAttack, Companion, CompanionAttack } from '../types';
-import { SKILLS, CLASSES_PHB, getLevelFromXP, getProficiencyFromLevel, SUBCLASSES_PHB } from '../constants';
+import { SKILLS, CLASSES_PHB, getLevelFromXP, getProficiencyFromLevel, SUBCLASSES_PHB, CLASS_ICONS } from '../constants';
+import { LayoutGrid } from 'lucide-react';
 import { translations, attributeTranslations, attributeAbbreviations, skillTranslations, classTranslations, raceTranslations, alignmentTranslations } from '../translations';
 
 interface Props {
@@ -32,6 +33,93 @@ const DEFAULT_COMPANION: Companion = {
   flaw: ""
 };
 
+const getModifier = (score: number) => Math.floor((score - 10) / 2);
+
+interface StatBoxMedallionProps {
+  attr: Attribute;
+  score: number;
+  isDark: boolean;
+  lang: 'pt' | 'en';
+  abbreviateAttributes: boolean;
+  attrAbbrT: typeof attributeAbbreviations;
+  attrT: typeof attributeTranslations;
+  updateCharacter: (updates: Partial<Character>) => void;
+  characterStats: Record<Attribute, number>;
+}
+
+const StatBoxMedallion: React.FC<StatBoxMedallionProps> = ({ 
+  attr, 
+  score, 
+  isDark, 
+  lang, 
+  abbreviateAttributes, 
+  attrAbbrT, 
+  attrT, 
+  updateCharacter, 
+  characterStats 
+}) => {
+  const [inputValue, setInputValue] = useState(score.toString());
+
+  useEffect(() => {
+    setInputValue(score.toString());
+  }, [score]);
+
+  const mod = getModifier(score);
+  const modDisplay = mod >= 0 ? `+${mod}` : mod;
+  const displayName = abbreviateAttributes ? attrAbbrT[attr][lang] : attrT[attr][lang];
+  
+  return (
+    <div className="flex flex-col items-center group relative w-full max-w-[110px] mx-auto">
+      <div className={`relative w-full aspect-square border-2 rounded-lg shadow-md flex flex-col items-center justify-center transition-all bg-[url('https://www.transparenttextures.com/patterns/p6.png')] ${
+        isDark 
+          ? 'bg-[#1a1a1a] border-[#333] group-hover:border-[#d4af37] shadow-black/50' 
+          : 'bg-[#fdf5e6] border-[#8b4513] group-hover:border-[#d4af37]'
+      }`}>
+        <span className={`absolute -top-3 text-[10px] px-2.5 py-0.5 rounded-sm font-bold cinzel tracking-widest border z-30 shadow-sm uppercase ${
+          isDark 
+            ? 'bg-[#d4af37] text-[#1a1a1a] border-[#fffacd]/20' 
+            : 'bg-[#8b4513] text-[#fdf5e6] border-[#d4af37]/40'
+        }`}>
+          {displayName}
+        </span>
+        <div className="flex items-center justify-center w-full h-full px-1">
+          <input 
+            type="text"
+            inputMode="numeric"
+            value={inputValue}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === '' || /^[0-9]*$/.test(val)) {
+                setInputValue(val);
+                if (val !== '') {
+                  let num = parseInt(val);
+                  if (num > 30) num = 30;
+                  updateCharacter({ stats: { ...characterStats, [attr]: num } });
+                }
+              }
+            }}
+            onBlur={() => {
+              if (inputValue === '') {
+                setInputValue(score.toString());
+              }
+            }}
+            className={`text-4xl sm:text-5xl font-bold fantasy-title bg-transparent w-full text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+              isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'
+            }`}
+          />
+        </div>
+        <div className={`absolute -bottom-4 w-10 h-10 border-2 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform z-20 ${
+          isDark 
+            ? 'bg-[#222] border-[#444] text-[#d4af37]' 
+            : 'bg-[#fdf5e6] border-[#8b4513] text-[#8b4513] bg-[radial-gradient(#fff_0%,#fdf5e6_100%)]'
+        }`}>
+           <span className="text-xl font-bold cinzel relative z-10">{modDisplay}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUpload, theme = 'light', abbreviateAttributes = false, showClassFeaturesTab = false }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -41,13 +129,13 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
   const [portraitError, setPortraitError] = useState(false);
   const [isCompanionExpanded, setIsCompanionExpanded] = useState(true);
   const [languagesInput, setLanguagesInput] = useState(character.proficiencies.languages.join(', '));
+  const [profInput, setProfInput] = useState('');
   
   const lang = character.language || 'pt';
   const t = translations[lang];
   const attrT = attributeTranslations;
   const attrAbbrT = attributeAbbreviations;
   
-  const getModifier = (score: number) => Math.floor((score - 10) / 2);
   const isDark = theme === 'dark';
 
   const translateValue = (val: string, dictionary: Record<string, { pt: string, en: string }>) => {
@@ -80,58 +168,15 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
     return getProficiencyFromLevel(currentLevel);
   }, [character.exp, character.proficiencyBonusOverride]);
 
+  useEffect(() => {
+    setProfInput(profBonus.toString());
+  }, [profBonus, character.id]);
+
   const passivePerception = useMemo(() => {
     const wisMod = getModifier(character.stats[Attribute.SAB]);
     const isProficient = character.proficiencies.skills.includes('Percepção');
     return 10 + wisMod + (isProficient ? profBonus : 0);
   }, [character.stats, character.proficiencies.skills, profBonus]);
-
-  const StatBoxMedallion: React.FC<{ attr: Attribute, score: number }> = ({ attr, score }) => {
-    const mod = getModifier(score);
-    const modDisplay = mod >= 0 ? `+${mod}` : mod;
-    const displayName = abbreviateAttributes ? attrAbbrT[attr][lang] : attrT[attr][lang];
-    
-    return (
-      <div className="flex flex-col items-center group relative w-full max-w-[110px] mx-auto">
-        <div className={`relative w-full aspect-square border-2 rounded-lg shadow-md flex flex-col items-center justify-center transition-all bg-[url('https://www.transparenttextures.com/patterns/p6.png')] ${
-          isDark 
-            ? 'bg-[#1a1a1a] border-[#333] group-hover:border-[#d4af37] shadow-black/50' 
-            : 'bg-[#fdf5e6] border-[#8b4513] group-hover:border-[#d4af37]'
-        }`}>
-          <span className={`absolute -top-3 text-[10px] px-2.5 py-0.5 rounded-sm font-bold cinzel tracking-widest border z-30 shadow-sm uppercase ${
-            isDark 
-              ? 'bg-[#d4af37] text-[#1a1a1a] border-[#fffacd]/20' 
-              : 'bg-[#8b4513] text-[#fdf5e6] border-[#d4af37]/40'
-          }`}>
-            {displayName}
-          </span>
-          <div className="flex items-center justify-center w-full h-full px-1">
-            <input 
-              type="number"
-              max={30}
-              min="0"
-              value={score}
-              onChange={(e) => {
-                let val = parseInt(e.target.value) || 0;
-                if (val > 30) val = 30;
-                updateCharacter({ stats: { ...character.stats, [attr]: val } });
-              }}
-              className={`text-4xl sm:text-5xl font-bold fantasy-title bg-transparent w-full text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
-                isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'
-              }`}
-            />
-          </div>
-          <div className={`absolute -bottom-4 w-10 h-10 border-2 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform z-20 ${
-            isDark 
-              ? 'bg-[#222] border-[#444] text-[#d4af37]' 
-              : 'bg-[#fdf5e6] border-[#8b4513] text-[#8b4513] bg-[radial-gradient(#fff_0%,#fdf5e6_100%)]'
-          }`}>
-             <span className="text-xl font-bold cinzel relative z-10">{modDisplay}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const toggleSkill = (skillName: string) => {
     const currentSkills = [...character.proficiencies.skills];
@@ -219,7 +264,13 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                   isDark ? 'border-white/10 focus:border-[#d4af37] text-[#e8d5b5]' : 'border-[#8b4513]/20 focus:border-[#8b4513] text-[#3e2723]'
                 }`}
               >
-                <span className="truncate">{translateValue(character.class, classTranslations)}</span>
+                <span className="truncate flex items-center gap-2">
+                  {(() => {
+                    const Icon = CLASS_ICONS[character.class] || LayoutGrid;
+                    return <Icon className={`w-4 h-4 ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`} />;
+                  })()}
+                  {translateValue(character.class, classTranslations)}
+                </span>
                 <svg 
                   className={`w-3 h-3 transition-transform duration-300 opacity-40 group-hover:opacity-100 ${isClassDropdownOpen ? 'rotate-180' : ''}`} 
                   fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -237,12 +288,16 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                       <button
                         key={cls}
                         onClick={() => handleClassChange(cls)}
-                        className={`w-full text-left px-4 py-3 fantasy-title text-base sm:text-lg transition-all border-b last:border-b-0 ${
+                        className={`w-full text-left px-4 py-3 fantasy-title text-base sm:text-lg transition-all border-b last:border-b-0 flex items-center gap-3 ${
                           character.class === cls 
                             ? (isDark ? 'bg-[#d4af37] text-black' : 'bg-[#8b4513] text-[#fdf5e6]')
                             : (isDark ? 'text-[#e8d5b5] border-white/5 hover:bg-white/5' : 'text-[#3e2723] border-[#8b4513]/10 hover:bg-[#8b4513]/5')
                         }`}
                       >
+                        {(() => {
+                          const Icon = CLASS_ICONS[cls] || LayoutGrid;
+                          return <Icon className={`w-4 h-4 ${character.class === cls ? (isDark ? 'text-black' : 'text-[#fdf5e6]') : (isDark ? 'text-[#d4af37]' : 'text-[#8b4513]')}`} />;
+                        })()}
                         {translateValue(cls, classTranslations)}
                       </button>
                     ))}
@@ -285,7 +340,18 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
               <h3 className={`cinzel text-xs font-bold text-center mb-10 uppercase tracking-[0.2em] border-b pb-2 ${isDark ? 'text-[#d4af37] border-white/5' : 'text-[#8b4513] border-[#8b4513]/10'}`}>{t.attributes}</h3>
               <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-1 gap-y-12 gap-x-4">
                 {(Object.entries(character.stats) as [Attribute, number][]).map(([attr, score]) => (
-                  <StatBoxMedallion key={attr} attr={attr} score={score} />
+                  <StatBoxMedallion 
+                    key={attr} 
+                    attr={attr} 
+                    score={score} 
+                    isDark={isDark}
+                    lang={lang as 'pt' | 'en'}
+                    abbreviateAttributes={abbreviateAttributes}
+                    attrAbbrT={attrAbbrT}
+                    attrT={attrT}
+                    updateCharacter={updateCharacter}
+                    characterStats={character.stats}
+                  />
                 ))}
               </div>
            </div>
@@ -300,17 +366,24 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                   <div className="flex items-center justify-center w-full">
                     <span className={`text-lg font-bold fantasy-title ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}>+</span>
                     <input 
-                      type="number" 
-                      value={character.proficiencyBonusOverride !== undefined ? character.proficiencyBonusOverride : profBonus} 
+                      type="text"
+                      inputMode="numeric"
+                      value={profInput} 
                       onChange={(e) => {
                         const val = e.target.value;
-                        if (val === '') {
-                           updateCharacter({ proficiencyBonusOverride: undefined });
-                        } else {
-                           updateCharacter({ proficiencyBonusOverride: parseInt(val) });
+                        if (val === '' || /^[0-9]*$/.test(val)) {
+                          setProfInput(val);
+                          if (val !== '') {
+                            updateCharacter({ proficiencyBonusOverride: parseInt(val) });
+                          }
                         }
-                      }} 
-                      className={`w-8 text-center bg-transparent focus:outline-none font-bold text-lg fantasy-title [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`} 
+                      }}
+                      onBlur={() => {
+                        if (profInput === '') {
+                          updateCharacter({ proficiencyBonusOverride: undefined });
+                        }
+                      }}
+                      className={`w-8 text-center bg-transparent focus:outline-none font-bold text-lg fantasy-title ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`} 
                     />
                   </div>
                 </div>
@@ -507,6 +580,11 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                     <input type="checkbox" checked={isProf} onChange={() => toggleSkill(skill.name)} className={`w-4 h-4 cursor-pointer ${isDark ? 'accent-[#d4af37]' : 'accent-[#8b4513]'}`} />
                     <span className={`w-7 font-bold text-center text-base ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>{mod >= 0 ? `+${mod}` : mod}</span>
                     <div className="flex items-center flex-grow truncate">
+                      {skill.icon && (
+                        <skill.icon className={`w-3.5 h-3.5 mr-2 opacity-60 group-hover/skill:opacity-100 transition-opacity ${
+                          isProf ? (isDark ? 'text-[#d4af37]' : 'text-[#8b4513]') : (isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]')
+                        }`} />
+                      )}
                       <span className={`parchment-text font-bold uppercase tracking-tighter mr-1 transition-colors ${
                         isProf ? (isDark ? 'text-[#d4af37]' : 'text-[#8b4513]') : (isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]')
                       }`}>
@@ -558,8 +636,8 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                   </div>
                 ) : (
                   character.weapons.map((w, idx) => (
-                    <div key={idx} className={`border p-3 rounded-lg relative group ${isDark ? 'bg-black/20 border-white/5' : 'bg-white/40 border-[#8b4513]/10'}`}>
-                      <div className="flex justify-between items-start mb-2">
+                    <div key={idx} className={`border p-4 rounded-xl relative group transition-all duration-300 ${isDark ? 'bg-[#2a2a2a]/40 border-white/10 hover:border-[#d4af37]/30 shadow-lg shadow-black/20' : 'bg-white/60 border-[#8b4513]/20 shadow-md'}`}>
+                      <div className="flex justify-between items-start mb-3">
                         <input 
                           value={w.name}
                           onChange={(e) => {
@@ -567,26 +645,26 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                             next[idx].name = e.target.value;
                             updateCharacter({ weapons: next });
                           }}
-                          className={`bg-transparent font-bold fantasy-title outline-none focus:border-b border-white/20 w-2/3 ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}
+                          className={`bg-transparent font-bold fantasy-title text-xl outline-none focus:border-b border-white/20 w-2/3 ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}
                         />
                         <button 
                           onClick={() => updateCharacter({ weapons: character.weapons.filter((_, i) => i !== idx) })}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-red-500 transition-opacity"
+                          className="opacity-0 group-hover:opacity-100 p-1 text-red-500 transition-opacity hover:scale-110"
                         >
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                         </button>
                       </div>
                       <div className="grid grid-cols-4 gap-2">
-                        <div className={`col-span-1 text-center p-1 rounded border ${isDark ? 'bg-black/40 border-white/5' : 'bg-[#8b4513]/5 border-[#8b4513]/10'}`}>
-                          <span className={`block text-[8px] cinzel font-bold uppercase tracking-widest opacity-60 ${isDark ? 'text-[#d4af37]' : ''}`}>{t.bonus}</span>
-                          <input value={w.bonus} onChange={(e) => { const next = [...character.weapons]; next[idx].bonus = e.target.value; updateCharacter({ weapons: next }); }} className={`bg-transparent w-full text-center font-bold outline-none ${isDark ? 'text-[#e8d5b5]' : ''}`} />
+                        <div className={`col-span-1 text-center p-2 rounded-lg border transition-colors ${isDark ? 'bg-black/60 border-white/10 focus-within:border-[#d4af37]/50' : 'bg-[#8b4513]/5 border-[#8b4513]/10 focus-within:border-[#8b4513]/40'}`}>
+                          <span className={`block text-[9px] cinzel font-bold uppercase tracking-widest mb-1 ${isDark ? 'text-[#d4af37] opacity-80' : 'text-[#8b4513] opacity-60'}`}>{t.bonus}</span>
+                          <input value={w.bonus} onChange={(e) => { const next = [...character.weapons]; next[idx].bonus = e.target.value; updateCharacter({ weapons: next }); }} className={`bg-transparent w-full text-center font-bold outline-none text-sm ${isDark ? 'text-[#f5e6d3]' : 'text-[#3e2723]'}`} />
                         </div>
-                        <div className={`col-span-1 text-center p-1 rounded border ${isDark ? 'bg-black/40 border-white/5' : 'bg-[#8b4513]/5 border-[#8b4513]/10'}`}>
-                          <span className={`block text-[8px] cinzel font-bold uppercase tracking-widest opacity-60 ${isDark ? 'text-[#d4af37]' : ''}`}>{lang === 'pt' ? 'Dano' : 'Damage'}</span>
-                          <input value={w.damage} onChange={(e) => { const next = [...character.weapons]; next[idx].damage = e.target.value; updateCharacter({ weapons: next }); }} className={`bg-transparent w-full text-center font-bold outline-none ${isDark ? 'text-[#e8d5b5]' : ''}`} />
+                        <div className={`col-span-1 text-center p-2 rounded-lg border transition-colors ${isDark ? 'bg-black/60 border-white/10 focus-within:border-[#d4af37]/50' : 'bg-[#8b4513]/5 border-[#8b4513]/10 focus-within:border-[#8b4513]/40'}`}>
+                          <span className={`block text-[9px] cinzel font-bold uppercase tracking-widest mb-1 ${isDark ? 'text-[#d4af37] opacity-80' : 'text-[#8b4513] opacity-60'}`}>{lang === 'pt' ? 'Dano' : 'Damage'}</span>
+                          <input value={w.damage} onChange={(e) => { const next = [...character.weapons]; next[idx].damage = e.target.value; updateCharacter({ weapons: next }); }} className={`bg-transparent w-full text-center font-bold outline-none text-sm ${isDark ? 'text-[#f5e6d3]' : 'text-[#3e2723]'}`} />
                         </div>
-                        <div className={`col-span-2 text-center p-1 rounded border ${isDark ? 'bg-black/40 border-white/5' : 'bg-[#8b4513]/5 border-[#8b4513]/10'}`}>
-                          <span className={`block text-[8px] cinzel font-bold uppercase tracking-widest opacity-60 ${isDark ? 'text-[#d4af37]' : ''}`}>{lang === 'pt' ? 'Tipo' : 'Type'}</span>
+                        <div className={`col-span-2 text-center p-2 rounded-lg border transition-colors ${isDark ? 'bg-black/60 border-white/10 focus-within:border-[#d4af37]/50' : 'bg-[#8b4513]/5 border-[#8b4513]/10 focus-within:border-[#8b4513]/40'}`}>
+                          <span className={`block text-[9px] cinzel font-bold uppercase tracking-widest mb-1 ${isDark ? 'text-[#d4af37] opacity-80' : 'text-[#8b4513] opacity-60'}`}>{lang === 'pt' ? 'Tipo' : 'Type'}</span>
                           <input 
                             value={w.type || ''} 
                             onChange={(e) => { 
@@ -595,11 +673,11 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                               updateCharacter({ weapons: next }); 
                             }} 
                             placeholder={lang === 'pt' ? "Ex: 1 Mão" : "Ex: 1 Hand"}
-                            className={`bg-transparent w-full text-center font-bold outline-none cinzel text-[10px] ${isDark ? 'text-[#e8d5b5] placeholder:text-white/10' : 'text-[#3e2723] placeholder:text-black/10'}`}
+                            className={`bg-transparent w-full text-center font-bold outline-none cinzel text-[11px] ${isDark ? 'text-[#f5e6d3] placeholder:text-white/10' : 'text-[#3e2723] placeholder:text-black/10'}`}
                           />
                         </div>
                       </div>
-                      <div className="mt-2">
+                      <div className="mt-3">
                         <textarea
                           placeholder={lang === 'pt' ? "Propriedades da arma (Acuidade, Versátil...)" : "Weapon properties (Finesse, Versatile...)"}
                           value={w.description || ''}
@@ -608,7 +686,7 @@ const CharacterSheet: React.FC<Props> = ({ character, updateCharacter, onImageUp
                             next[idx].description = e.target.value;
                             updateCharacter({ weapons: next });
                           }}
-                          className={`w-full bg-transparent font-sans text-[12px] focus:outline-none resize-none overflow-hidden min-h-[1.5rem] border-t border-black/5 pt-1 ${isDark ? 'text-[#e8d5b5]/60 placeholder:text-white/5 border-white/5' : 'text-[#3e2723]/60 placeholder:text-black/5'}`}
+                          className={`w-full bg-transparent font-sans text-[13px] focus:outline-none resize-none overflow-hidden min-h-[1.5rem] border-t border-black/5 pt-2 ${isDark ? 'text-[#e8d5b5]/70 placeholder:text-white/10 border-white/10' : 'text-[#3e2723]/70 placeholder:text-black/10'}`}
                           rows={1}
                           onInput={(e) => {
                             const target = e.target as HTMLTextAreaElement;

@@ -11,131 +11,128 @@ interface Props {
   showClassFeaturesTab?: boolean;
 }
 
+interface SpellSealProps {
+  label: string;
+  sub: string;
+  children: React.ReactNode;
+  disabled?: boolean;
+  isDark: boolean;
+}
+
+const SpellSeal: React.FC<SpellSealProps> = ({ label, sub, children, disabled, isDark }) => (
+  <div className={`flex flex-col items-center group relative ${disabled ? 'opacity-40 grayscale' : ''}`}>
+    <span className={`cinzel text-[7px] sm:text-[9px] font-bold uppercase tracking-[0.2em] mb-3 relative z-10 transition-colors ${
+      isDark ? 'text-[#d4af37]/80 group-hover:text-[#d4af37]' : 'text-[#8b4513] group-hover:text-[#d4af37]'
+    }`}>
+      {label}
+    </span>
+
+    <div className={`w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 shadow-[0_10px_25px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 ${
+      isDark 
+        ? 'bg-[#1a1a1a] border-[#333] group-hover:border-[#d4af37] group-hover:shadow-[0_0_20px_rgba(212,175,55,0.4)]' 
+        : 'bg-[#fdf5e6] border-[#8b4513] group-hover:border-[#d4af37] group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]'
+    }`}>
+      
+      <div className={`absolute inset-0 pointer-events-none transition-opacity duration-700 rotate-0 group-hover:rotate-45 ${isDark ? 'opacity-[0.1]' : 'opacity-[0.07]'}`}>
+        <svg viewBox="0 0 100 100" className={`w-full h-full fill-none stroke-current stroke-[0.5] ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>
+          <circle cx="50" cy="50" r="45" />
+          <circle cx="50" cy="50" r="38" />
+          <path d="M50 5 L95 80 L5 80 Z" />
+          <path d="M50 95 L5 20 L95 20 Z" />
+          <rect x="25" y="25" width="50" height="50" transform="rotate(45 50 50)" />
+        </svg>
+      </div>
+
+      <div className={`absolute inset-0 transition-opacity ${isDark ? 'bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.25)_0%,transparent_70%)]' : 'bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.15)_0%,transparent_70%)]'} opacity-0 group-hover:opacity-100`}></div>
+      
+      <div className="relative z-20 flex items-center justify-center w-full px-2">
+        {children}
+      </div>
+
+      <div className={`absolute inset-2 border rounded-full pointer-events-none ${isDark ? 'border-white/5' : 'border-[#8b4513]/10'}`}></div>
+    </div>
+
+    <span className="cinzel text-[7px] sm:text-[8px] font-bold opacity-40 mt-3 uppercase tracking-widest relative z-10">
+      {sub}
+    </span>
+  </div>
+);
+
+const SpellStatInput = ({ value, onChange, readOnly, isDark, highlight = false }: { 
+  value: string | number, 
+  onChange: (val: string) => void, 
+  readOnly?: boolean, 
+  isDark: boolean,
+  highlight?: boolean
+}) => (
+  <input 
+    type="text"
+    readOnly={readOnly}
+    value={value}
+    onChange={(e) => onChange(e.target.value)}
+    className={`bg-transparent text-3xl sm:text-5xl font-bold fantasy-title text-center outline-none w-full ${
+      highlight 
+        ? (isDark ? 'text-[#d4af37]' : 'text-[#8b4513]')
+        : (isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]')
+    } ${readOnly ? '' : '[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'}`}
+  />
+);
+
 const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light', showClassFeaturesTab = true }) => {
-  const [newSpell, setNewSpell] = useState({ name: '', level: 0, description: '' });
   const isDark = theme === 'dark';
   const lang = character.language || 'pt';
   const t = translations[lang];
-  const attrT = attributeTranslations;
+  const [newSpell, setNewSpell] = useState<Partial<Spell>>({ name: '', level: 0, description: '' });
 
-  // Cálculos de Nível e Proficiência
-  const currentLevel = getLevelFromXP(character.exp);
-  const profBonus = getProficiencyFromLevel(currentLevel);
-  
-  // Lógica de Detecção de Conjurador e Atributo Automático
   const spellcastingConfig = useMemo(() => {
-    const isBaseCaster = character.classMetadata?.isSpellcaster;
-    const isArcaneKnight = character.class === "Guerreiro" && character.subclass === "Cavaleiro Arcano";
-    const isArcaneTrickster = character.class === "Ladino" && character.subclass === "Trapaceiro Arcano";
-    
-    // Se as características de classe estiverem desativadas, o usuário tem controle total
-    const enabled = !showClassFeaturesTab || isBaseCaster || isArcaneKnight || isArcaneTrickster;
-    
-    let ability = character.spellcastingAbility;
-    if (!ability) {
-      if (character.class === "Paladino") ability = Attribute.CAR;
-      else if (isArcaneKnight || isArcaneTrickster) ability = Attribute.INT;
-      else ability = character.classMetadata?.spellAbility || Attribute.INT;
-    }
-
-    return { enabled, ability };
-  }, [character.class, character.subclass, character.classMetadata, character.spellcastingAbility, showClassFeaturesTab]);
-
-  // Cálculos de Atributos e Bônus
-  const abilityMod = Math.floor((character.stats[spellcastingConfig.ability] - 10) / 2);
-  
-  const autoDC = 8 + abilityMod + profBonus;
-  const autoAttack = (abilityMod + profBonus) >= 0 ? `+${abilityMod + profBonus}` : `${abilityMod + profBonus}`;
-
-  // Valores Finais para Exibição
-  const displayDC = spellcastingConfig.enabled ? (character.spellSaveDC !== undefined ? character.spellSaveDC : autoDC) : "—";
-  const displayAttack = spellcastingConfig.enabled ? (character.spellAttackBonus !== undefined ? character.spellAttackBonus : autoAttack) : "—";
-  const displayAbilityName = spellcastingConfig.enabled ? attrT[spellcastingConfig.ability][lang] : (lang === 'pt' ? "Sem Conjuração" : "No Casting");
-
-  const toggleSlot = (level: number, used: boolean) => {
-    if (!spellcastingConfig.enabled) return;
-    const slots = { ...character.spellSlots };
-    if (!slots[level]) slots[level] = { total: 0, used: 0 };
-    
-    if (used) {
-        slots[level].used = Math.min(slots[level].total, slots[level].used + 1);
-    } else {
-        slots[level].used = Math.max(0, slots[level].used - 1);
-    }
-    updateCharacter({ spellSlots: slots });
-  };
-
-  const updateSlotTotal = (level: number, total: number) => {
-    if (!spellcastingConfig.enabled) return;
-    const slots = { ...character.spellSlots };
-    const currentUsed = slots[level]?.used || 0;
-    slots[level] = {
-        total: total,
-        used: Math.min(currentUsed, total)
+    const ability = character.spellcastingAbility || (Attribute ? Attribute.INT : 'INT' as Attribute);
+    const mod = Math.floor(((character.stats[ability] || 10) - 10) / 2);
+    const prof = getProficiencyFromLevel(getLevelFromXP(character.xp));
+    return {
+      enabled: !!character.class && character.class !== 'None',
+      ability,
+      mod,
+      prof,
+      dc: 8 + prof + mod,
+      attack: mod + prof
     };
-    updateCharacter({ spellSlots: slots });
-  };
+  }, [character]);
+
+  const displayDC = character.spellSaveDC || spellcastingConfig.dc;
+  const displayAttack = character.spellAttackBonus || (spellcastingConfig.attack >= 0 ? `+${spellcastingConfig.attack}` : spellcastingConfig.attack);
+  const displayAbilityName = attributeTranslations[lang][spellcastingConfig.ability];
 
   const addSpell = () => {
-    if (!newSpell.name || !spellcastingConfig.enabled) return;
-    const spell: Spell = {
-      name: newSpell.name,
-      level: newSpell.level,
-      prepared: newSpell.level === 0,
-      description: newSpell.description
-    };
-    updateCharacter({ spells: [...character.spells, spell] });
+    if (!newSpell.name) return;
+    const spells = [...character.spells, { ...newSpell, prepared: false } as Spell];
+    updateCharacter({ spells });
     setNewSpell({ name: '', level: 0, description: '' });
   };
 
   const removeSpell = (name: string) => {
-    updateCharacter({ spells: character.spells.filter(s => s.name !== name) });
+    const spells = character.spells.filter(s => s.name !== name);
+    updateCharacter({ spells });
   };
 
   const togglePrepare = (name: string) => {
-    updateCharacter({
-      spells: character.spells.map(s => s.name === name ? { ...s, prepared: !s.prepared } : s)
-    });
+    const spells = character.spells.map(s => 
+      s.name === name ? { ...s, prepared: !s.prepared } : s
+    );
+    updateCharacter({ spells });
   };
 
-  const SpellSeal: React.FC<{ label: string; sub: string; children: React.ReactNode; disabled?: boolean }> = ({ label, sub, children, disabled }) => (
-    <div className={`flex flex-col items-center group relative ${disabled ? 'opacity-40 grayscale' : ''}`}>
-      <span className={`cinzel text-[7px] sm:text-[9px] font-bold uppercase tracking-[0.2em] mb-3 relative z-10 transition-colors ${
-        isDark ? 'text-[#d4af37]/80 group-hover:text-[#d4af37]' : 'text-[#8b4513] group-hover:text-[#d4af37]'
-      }`}>
-        {label}
-      </span>
+  const updateSlotTotal = (level: number, total: number) => {
+    const slots = { ...character.spellSlots };
+    slots[level] = { ...slots[level], total };
+    updateCharacter({ spellSlots: slots });
+  };
 
-      <div className={`w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 shadow-[0_10px_25px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center relative overflow-hidden transition-all duration-500 ${
-        isDark 
-          ? 'bg-[#1a1a1a] border-[#333] group-hover:border-[#d4af37] group-hover:shadow-[0_0_20px_rgba(212,175,55,0.4)]' 
-          : 'bg-[#fdf5e6] border-[#8b4513] group-hover:border-[#d4af37] group-hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]'
-      }`}>
-        
-        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-700 rotate-0 group-hover:rotate-45 ${isDark ? 'opacity-[0.1]' : 'opacity-[0.07]'}`}>
-          <svg viewBox="0 0 100 100" className={`w-full h-full fill-none stroke-current stroke-[0.5] ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}>
-            <circle cx="50" cy="50" r="45" />
-            <circle cx="50" cy="50" r="38" />
-            <path d="M50 5 L95 80 L5 80 Z" />
-            <path d="M50 95 L5 20 L95 20 Z" />
-            <rect x="25" y="25" width="50" height="50" transform="rotate(45 50 50)" />
-          </svg>
-        </div>
-
-        <div className={`absolute inset-0 transition-opacity ${isDark ? 'bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.25)_0%,transparent_70%)]' : 'bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.15)_0%,transparent_70%)]'} opacity-0 group-hover:opacity-100`}></div>
-        
-        <div className="relative z-20 flex items-center justify-center w-full px-2">
-          {children}
-        </div>
-
-        <div className={`absolute inset-2 border rounded-full pointer-events-none ${isDark ? 'border-white/5' : 'border-[#8b4513]/10'}`}></div>
-      </div>
-
-      <span className="cinzel text-[7px] sm:text-[8px] font-bold opacity-40 mt-3 uppercase tracking-widest relative z-10">
-        {sub}
-      </span>
-    </div>
-  );
+  const toggleSlot = (level: number, used: boolean) => {
+    const slots = { ...character.spellSlots };
+    const currentUsed = slots[level]?.used || 0;
+    slots[level] = { ...slots[level], used: used ? currentUsed + 1 : Math.max(0, currentUsed - 1) };
+    updateCharacter({ spellSlots: slots });
+  };
 
   return (
     <div className="flex flex-col gap-8 p-4 sm:p-6 max-w-6xl mx-auto pb-24">
@@ -144,7 +141,7 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
       <div className="flex flex-wrap justify-center gap-8 sm:gap-20 py-8 relative">
         <div className={`absolute top-1/2 left-20 right-20 h-0.5 -translate-y-1/2 hidden lg:block ${isDark ? 'bg-gradient-to-r from-transparent via-white/5 to-transparent' : 'bg-gradient-to-r from-transparent via-[#8b4513]/10 to-transparent'}`}></div>
         
-        <SpellSeal label={t.casting_ability} sub={displayAbilityName}>
+        <SpellSeal label={t.casting_ability} sub={displayAbilityName} isDark={isDark}>
           {spellcastingConfig.enabled ? (
             <select 
               value={spellcastingConfig.ability}
@@ -160,23 +157,22 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
           )}
         </SpellSeal>
 
-        <SpellSeal label={t.spell_save_dc} sub={t.difficulty} disabled={!spellcastingConfig.enabled}>
-          <input 
-            type="text"
+        <SpellSeal label={t.spell_save_dc} sub={t.difficulty} disabled={!spellcastingConfig.enabled} isDark={isDark}>
+          <SpellStatInput 
             readOnly={!spellcastingConfig.enabled}
             value={displayDC}
-            onChange={(e) => spellcastingConfig.enabled && updateCharacter({ spellSaveDC: parseInt(e.target.value) || 0 })}
-            className={`bg-transparent text-3xl sm:text-5xl font-bold fantasy-title text-center outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${isDark ? 'text-[#e8d5b5]' : 'text-[#3e2723]'}`}
+            onChange={(val) => spellcastingConfig.enabled && updateCharacter({ spellSaveDC: parseInt(val) || 0 })}
+            isDark={isDark}
           />
         </SpellSeal>
 
-        <SpellSeal label={t.spell_attack_mod} sub={t.bonus} disabled={!spellcastingConfig.enabled}>
-          <input 
-            type="text"
+        <SpellSeal label={t.spell_attack_mod} sub={t.bonus} disabled={!spellcastingConfig.enabled} isDark={isDark}>
+          <SpellStatInput 
             readOnly={!spellcastingConfig.enabled}
             value={displayAttack}
-            onChange={(e) => spellcastingConfig.enabled && updateCharacter({ spellAttackBonus: e.target.value })}
-            className={`bg-transparent text-3xl sm:text-5xl font-bold fantasy-title text-center outline-none w-full ${isDark ? 'text-[#d4af37]' : 'text-[#8b4513]'}`}
+            onChange={(val) => spellcastingConfig.enabled && updateCharacter({ spellAttackBonus: val })}
+            isDark={isDark}
+            highlight={true}
           />
         </SpellSeal>
       </div>
