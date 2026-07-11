@@ -100,7 +100,7 @@ const Spellbook: React.FC<Props> = ({ character, updateCharacter, theme = 'light
 
   const displayDC = character.spellSaveDC || spellcastingConfig.dc;
   const displayAttack = character.spellAttackBonus || (spellcastingConfig.attack >= 0 ? `+${spellcastingConfig.attack}` : spellcastingConfig.attack);
-  const displayAbilityName = attributeTranslations[lang][spellcastingConfig.ability];
+  const displayAbilityName = attributeTranslations[spellcastingConfig.ability]?.[lang as 'pt' | 'en'] || spellcastingConfig.ability;
 
   const addSpell = () => {
     if (!newSpell.name) return;
